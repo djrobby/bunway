@@ -8,6 +8,7 @@ title: Getting started
 ## Requirements
 
 - Bun 1.4 or newer
+- No Node.js installation is required; generated tooling is explicitly executed with Bun.
 - PostgreSQL for the default adapter, MySQL for `--database=mysql`, SQLite with no server,
   or a running PocketBase service for `--database=pocketbase`.
 

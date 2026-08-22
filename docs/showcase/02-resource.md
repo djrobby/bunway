@@ -1,22 +1,26 @@
 ---
-title: 2. Build Product CRUD
+title: 2. Build Category and Product CRUD
 ---
 
-# 2. Build Product CRUD
+# 2. Build Category and Product CRUD
+
+Generate Category first because Product references it. This is also where the maintained test app adds
+its Product attachment; there is no extra resource introduced later.
 
 ```sh
-bunway g scaffold Product name:string price:decimal active:boolean
+bunway g scaffold Category name:string
+bunway g scaffold Product name:string price:decimal active:boolean category:belongs_to image:image:optional
 bunway db:migrate
 bunway dev
 ```
 
-The generator creates `src/db/schema/products.ts`, `src/routes/products.ts`, a Bun smoke test,
-SvelteKit list/detail pages, and explicit registrations. Elysia validates bodies, Drizzle queries data,
-and Eden Treaty infers the client contract.
+The generators create both schemas, routes, Bun smoke tests, SvelteKit list/detail pages, explicit API
+registrations, and Categories/Products sidebar entries. Product's relationship is an indexed Drizzle
+foreign key. Its image uses the storage schemas rather than a `products` column.
 
 :::tip Verify it
-Open `http://localhost:5173/products`. Create, edit, inspect, and delete a product. Run `bunway routes`
-and confirm five CRUD routes. Inspect the generated files: this is application code you own.
+Open `/categories`, create a category, then open `/products`. Create, edit, inspect, upload an image for,
+and delete a product. Confirm both sidebar links and inspect `web/src/lib/resources.ts`.
 :::
 
 Next: [add relationships and attachments](./03-relationships-storage.md).

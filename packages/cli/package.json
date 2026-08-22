@@ -9,7 +9,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "bunx tsc --noEmit --skipLibCheck"
+    "typecheck": "bunx --bun tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "@bunway/core": "workspace:*",

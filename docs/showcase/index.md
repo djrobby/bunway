@@ -5,20 +5,29 @@ title: Build the Bunway Showcase
 
 # Build the Bunway Showcase
 
-Build a publishing and operations application from a clean Bunway project. You will compose CRUD,
+Build the same publishing and operations application exercised by Bunway's real `bunway-test-app`. You will compose CRUD,
 relationships, attachments, PostgreSQL Jobs, SSE and WebSockets, Better Auth, Audit, Mail, and SMS.
+
+This is a reproducible build guide, not a tour of unrelated examples. The final application uses the
+same named surfaces as the maintained test app: Products, Categories, the Blog, Realtime, Auth, Audit,
+and Messaging. Generated files and hand-composed demo pages are identified explicitly; nothing appears
+through hidden route discovery.
 
 | Step | You will build |
 | --- | --- |
 | 1 | project, database, and mental model |
-| 2 | validated Product CRUD and SvelteKit UI |
-| 3 | relationships and file attachments |
-| 4 | durable processing, SSE progress, and WebSocket chat |
+| 2 | Category and validated Product CRUD, relationship, attachment, and SvelteKit UI |
+| 3 | the Users, Posts, Comments, and Tags publishing model |
+| 4 | durable processing plus the `/realtime` SSE/WebSocket demo and sidebar link |
 | 5 | password Auth, OAuth setup, TOTP, backup codes, protected routes |
-| 6 | durable Audit history and transactional Mail/SMS |
+| 6 | `/examples/audit` and `/examples/messaging`, with sidebar links |
 | 7 | tests, production build, and deployment plan |
 
 The tutorial requires Bun and PostgreSQL. Third-party OAuth, Mail, and SMS accounts are optional:
 development guidance and console delivery let you complete the local path without them.
+
+Restart `bunway dev` after adding routes or changing environment variables. Resource scaffolds add
+themselves to `web/src/lib/resources.ts`; Jobs and Realtime do not imply a UI, so their showcase pages
+are registered explicitly in this guide.
 
 Start with [1. Create and understand the app](./01-create.md).

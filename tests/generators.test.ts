@@ -31,6 +31,7 @@ describe("critical generation flow", () => {
     expect(developmentCommands[1]).toEqual([
       "bun",
       "run",
+      "--bun",
       "--cwd",
       "web",
       "dev",
@@ -92,6 +93,10 @@ describe("critical generation flow", () => {
       join(path, "web/src/lib/components/app-sidebar.svelte"),
     ).text();
     expect(sidebar).toContain("group-data-[collapsible=icon]:hidden");
+    const manifest = await Bun.file(join(path, "package.json")).json();
+    const webManifest = await Bun.file(join(path, "web", "package.json")).json();
+    expect(manifest.devDependencies.pg).toBe("latest");
+    expect(webManifest.scripts.dev).toBe("bun --bun vite");
     expect(
       await Bun.file(
         join(
@@ -127,6 +132,7 @@ describe("critical generation flow", () => {
             : "new PocketBase",
       );
       const manifest = await Bun.file(join(path, "package.json")).json();
+      expect(manifest.devDependencies.pg).toBeUndefined();
       if (adapter === "mysql")
         expect(manifest.dependencies.mysql2).toBe("latest");
       if (adapter === "pocketbase") {
@@ -170,6 +176,17 @@ describe("critical generation flow", () => {
     expect(index).toContain("export const analytics");
     expect(index).toContain("export const legacy");
     expect(index).toContain("export const content = new PocketBase");
+  });
+
+  test("adds the Drizzle Kit PostgreSQL driver to a non-PostgreSQL application", async () => {
+    const root = await mkdtemp(join(tmpdir(), "bunway-sqlite-postgres-"));
+    const path = join(root, "app");
+    await createProject(path, { install: false, database: "sqlite" });
+
+    await addDatabase("queue", "postgres", path);
+
+    const manifest = await Bun.file(join(path, "package.json")).json();
+    expect(manifest.devDependencies.pg).toBe("latest");
   });
 
   test("generates Better Auth directly with database, Elysia, and Svelte integration", async () => {

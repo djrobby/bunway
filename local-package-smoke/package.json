@@ -7,9 +7,9 @@
   ],
   "scripts": {
     "dev": "bunway dev",
-    "build": "bun run --cwd web build",
+    "build": "bun run --bun --cwd web build",
     "test": "bun test",
-    "typecheck": "bunx tsc --noEmit && bun run --cwd web check"
+    "typecheck": "bunx --bun tsc --noEmit && bun run --bun --cwd web check"
   },
   "dependencies": {
     "@bunway/cli": "file:../packages/cli",
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "drizzle-kit": "latest",
+    "pg": "8.23.0",
     "typescript": "latest"
   }
 }

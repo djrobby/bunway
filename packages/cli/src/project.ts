@@ -23,7 +23,7 @@ export async function createProject(name?: string, options: { install?: boolean;
     await rm(join(target, 'web'), { recursive: true, force: true })
     delete manifest.workspaces
     manifest.scripts.build = 'bun build src/app.ts --target=bun --outdir=dist'
-    manifest.scripts.typecheck = 'bunx tsc --noEmit'
+    manifest.scripts.typecheck = 'bunx --bun tsc --noEmit'
     await Bun.write(join(target, '.bunway-api-only'), 'API-only Bunway application\n')
   }
   await Bun.write(packagePath, `${JSON.stringify(manifest, null, 2)}\n`)

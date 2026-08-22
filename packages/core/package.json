@@ -8,7 +8,7 @@
     "./realtime/browser": "./src/realtime-browser.ts"
   },
   "scripts": {
-    "typecheck": "bunx tsc --noEmit --skipLibCheck"
+    "typecheck": "bunx --bun tsc --noEmit --skipLibCheck"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",

@@ -1,6 +1,6 @@
 export const developmentCommands = [
   ['bun', '--watch', 'src/app.ts'],
-  ['bun', 'run', '--cwd', 'web', 'dev']
+  ['bun', 'run', '--bun', '--cwd', 'web', 'dev']
 ] as const
 
 export function developmentNotice(port = Bun.env.PORT ?? '3000') {

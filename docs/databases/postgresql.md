@@ -7,6 +7,10 @@ title: PostgreSQL adapter
 PostgreSQL is Bunway's default and uses Drizzle's `bun-sql` driver over Bun.SQL. `DATABASE_URL` configures
 primary; named connections conventionally use `<NAME>_DATABASE_URL`.
 
+Generated PostgreSQL applications also include `pg` as a development dependency. Application queries
+still use Bun.SQL; `pg` exists because the current stable Drizzle Kit migration command requires one of
+its supported PostgreSQL connection drivers when it applies generated SQL.
+
 Generated UUID IDs use Drizzle's application default with Bun's native `Bun.randomUUIDv7()`. PostgreSQL
 stores the result in its ordinary `uuid` type, so UUIDv7 does not impose a PostgreSQL 18 requirement.
 Integer and bigint use `serial` and `bigserial`. Timestamps use native PostgreSQL timestamps with

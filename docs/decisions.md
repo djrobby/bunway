@@ -122,6 +122,14 @@ update routes explicitly refresh `updatedAt`. `--no-timestamps` opts out without
 Docusaurus documentation is part of Bunway's public interface. Generator, CLI, configuration, and
 runtime changes update the relevant guide and preserve a successful documentation build.
 
+## PostgreSQL runtime and migration clients stay separate
+
+Generated PostgreSQL applications use Bun.SQL through Drizzle at runtime. Stable Drizzle Kit still
+requires its supported `pg` client package when applying migrations, so PostgreSQL applications carry
+`pg` as a development dependency only. Drizzle Kit and that client execute under Bun; Node.js is not a
+runtime requirement. Bunway does not import `pg` in generated application code, and non-PostgreSQL
+applications do not receive it unless they add a named PostgreSQL database.
+
 ## UUID primary keys with Drizzle as relationship source of truth
 
 Generated PostgreSQL tables store UUIDv7 values in PostgreSQL's ordinary `uuid` type. Drizzle's

@@ -60,6 +60,7 @@ export async function addDatabase(name: string | undefined, adapter: DatabaseAda
     const envPath = join(cwd, '.env.example')
     await Bun.write(envPath, `${(await Bun.file(envPath).text()).trimEnd()}\n${env}=\n`)
   }
+  if (adapter === 'postgres') await ensurePostgresDependency(cwd)
   if (adapter === 'mysql') await ensureMysqlDependency(cwd)
   if (adapter === 'pocketbase') await ensurePocketBaseDependency(cwd)
   console.log(`Added ${name} (${adapterLabel(adapter)})`)
@@ -79,8 +80,8 @@ export async function migrateDatabases(name: string | undefined, all: boolean, c
     console.log(`Migrating ${current} (${adapterLabel(databases[current]!.adapter)})`)
     if (databases[current]!.adapter === 'pocketbase') throw new CliError(`PocketBase owns its migrations. Run the PocketBase executable with "migrate up --migrationsDir=${databaseDirectory(current).replaceAll('\\', '/')}/pb_migrations".`)
     const config = drizzleConfig(current)
-    await run(['bunx', 'drizzle-kit', 'generate', `--config=${config}`], cwd)
-    await run(['bunx', 'drizzle-kit', 'migrate', `--config=${config}`], cwd)
+    await run(['bunx', '--bun', 'drizzle-kit', 'generate', `--config=${config}`], cwd)
+    await run(['bunx', '--bun', 'drizzle-kit', 'migrate', `--config=${config}`], cwd)
   }
 }
 
@@ -115,8 +116,16 @@ export async function configurePrimary(adapter: DatabaseAdapter, cwd: string) {
   if (adapter !== 'pocketbase') await Bun.write(join(cwd, 'drizzle.config.ts'), drizzleConfigSource('primary', adapter, adapter === 'sqlite' ? "'./storage/development.sqlite'" : 'process.env.DATABASE_URL!'))
   else await rm(join(cwd, 'drizzle.config.ts'), { force: true })
   await rm(join(cwd, 'src', 'db', 'migrate.ts'), { force: true })
+  if (adapter === 'postgres') await ensurePostgresDependency(cwd)
   if (adapter === 'mysql') await ensureMysqlDependency(cwd)
   if (adapter === 'pocketbase') await ensurePocketBaseDependency(cwd)
+}
+
+async function ensurePostgresDependency(cwd: string) {
+  const path = join(cwd, 'package.json')
+  const manifest = await Bun.file(path).json()
+  manifest.devDependencies.pg = manifest.devDependencies.pg ?? 'latest'
+  await Bun.write(path, `${JSON.stringify(manifest, null, 2)}\n`)
 }
 
 async function ensureMysqlDependency(cwd: string) {
