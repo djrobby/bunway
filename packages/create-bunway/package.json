@@ -1,6 +1,29 @@
 {
   "name": "create-bunway",
-  "version": "0.1.0-preview.3",
+  "version": "0.1.0-preview.4",
+  "description": "Create a Bunway application with Bun, Elysia, Drizzle, PostgreSQL, Eden Treaty, and SvelteKit.",
+  "keywords": [
+    "bun",
+    "bunway",
+    "create",
+    "starter",
+    "elysia",
+    "drizzle",
+    "sveltekit",
+    "typescript"
+  ],
+  "homepage": "https://djrobby.github.io/bunway/getting-started",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djrobby/bunway.git",
+    "directory": "packages/create-bunway"
+  },
+  "bugs": {
+    "url": "https://github.com/djrobby/bunway/issues"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
+  },
   "type": "module",
   "bin": {
     "create-bunway": "./src/bin.ts"

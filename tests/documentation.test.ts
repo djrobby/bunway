@@ -16,6 +16,27 @@ test('documentation targets the Bunway GitHub Pages project site', async () => {
   expect(workflow).toContain('actions/deploy-pages@v4')
 })
 
+test('request lifecycle sits between first app and project structure and covers the full path', async () => {
+  const sidebar = await Bun.file(join(root, 'sidebars.ts')).text()
+  const lifecycle = await Bun.file(join(root, 'docs/request-lifecycle.md')).text()
+  const firstApp = await Bun.file(join(root, 'docs/first-app.md')).text()
+
+  expect(sidebar).toContain('"first-app", "request-lifecycle", "project-structure"')
+  for (const concept of [
+    'SvelteKit/Vite :5173',
+    'Elysia/Bun :3000',
+    'Eden Treaty',
+    'Elysia receives and validates',
+    'Drizzle and Bun.SQL reach PostgreSQL',
+    'The response becomes rendered UI',
+    'Attachments',
+    'Jobs',
+    'Realtime',
+    'Where to debug each failure',
+  ]) expect(lifecycle).toContain(concept)
+  expect(firstApp).toContain('./request-lifecycle.md')
+})
+
 test('showcase guide stays aligned with the maintained test application', async () => {
   const showcaseFiles = [
     'index.md',
@@ -54,4 +75,24 @@ test('showcase guide stays aligned with the maintained test application', async 
   }
   expect(showcase).toContain("{ label: 'Realtime Showcase', href: '/realtime', icon: 'chat' }")
   expect(showcase).toContain('Jobs and Realtime do not imply a UI')
+  for (const completeFile of [
+    'src/routes/blog.ts',
+    'web/src/lib/components/comment-thread.svelte',
+    'web/src/routes/blog/+page.svelte',
+    'src/jobs/process-demo-file.ts',
+    'src/realtime/showcase.ts',
+    'src/routes/realtime.ts',
+    'web/src/routes/realtime/+page.svelte',
+    'src/routes/audit.ts',
+    'web/src/routes/examples/audit/+page.svelte',
+    'src/routes/messaging.ts',
+    'web/src/routes/examples/messaging/+page.svelte',
+    'src/db/seed.ts',
+  ]) {
+    expect(showcase).toContain(`\`${completeFile}\``)
+  }
+  expect(showcase).toContain("import { blogRoutes } from './blog'")
+  expect(showcase).toContain("import { realtimeShowcaseRoutes } from './realtime'")
+  expect(showcase).toContain("import { auditShowcaseRoutes } from './audit'")
+  expect(showcase).toContain("import { messagingShowcaseRoutes } from './messaging'")
 })

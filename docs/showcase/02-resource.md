@@ -21,6 +21,15 @@ foreign key. Its image uses the storage schemas rather than a `products` column.
 :::tip Verify it
 Open `/categories`, create a category, then open `/products`. Create, edit, inspect, upload an image for,
 and delete a product. Confirm both sidebar links and inspect `web/src/lib/resources.ts`.
+
+Use this exact sequence so the Product relationship has a valid target:
+
+1. Open `http://localhost:5173/categories` and select **New Category**.
+2. Enter `Hardware`, save it, and confirm it appears in the table.
+3. Open `/products`, select **New Product**, and enter `Mechanical Keyboard`, `129.99`, enabled, and
+   Category `Hardware`.
+4. Save, open the Product detail page, upload an image, and reload to confirm attachment persistence.
+5. Edit the price, return to the table, and use Delete to verify the destructive confirmation dialog.
 :::
 
 Next: [add relationships and attachments](./03-relationships-storage.md).

@@ -11,6 +11,12 @@ Generated PostgreSQL applications also include `pg` as a development dependency.
 still use Bun.SQL; `pg` exists because the current stable Drizzle Kit migration command requires one of
 its supported PostgreSQL connection drivers when it applies generated SQL.
 
+`pg` is the default migration client. Select Postgres.js at creation time with
+`bun create bunway app --postgres-driver=postgres`. The selection affects Drizzle Kit only; application
+queries continue to use Bun.SQL. Before migrating, Bunway verifies that the selected package is present,
+runs `bun install` when it is missing, and fails with an actionable message if installation did not
+succeed.
+
 Generated UUID IDs use Drizzle's application default with Bun's native `Bun.randomUUIDv7()`. PostgreSQL
 stores the result in its ordinary `uuid` type, so UUIDv7 does not impose a PostgreSQL 18 requirement.
 Integer and bigint use `serial` and `bigserial`. Timestamps use native PostgreSQL timestamps with

@@ -134,6 +134,9 @@ requires its supported `pg` client package when applying migrations, so PostgreS
 `pg` as a development dependency only. Drizzle Kit and that client execute under Bun; Node.js is not a
 runtime requirement. Bunway does not import `pg` in generated application code, and non-PostgreSQL
 applications do not receive it unless they add a named PostgreSQL database.
+`pg` is the migration-client default; `--postgres-driver=postgres` selects Postgres.js without changing
+the runtime connection. Migration preflight verifies the selected package is physically installed and
+repairs stale installs with `bun install` before invoking Drizzle Kit.
 
 ## UUID primary keys with Drizzle as relationship source of truth
 

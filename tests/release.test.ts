@@ -40,6 +40,24 @@ test('every published package has package-specific npm documentation', async () 
   for (const readme of readmes) expect(readme).toContain('https://djrobby.github.io/bunway/')
 })
 
+test('every published package provides npm discovery metadata', async () => {
+  const manifests = await Promise.all(
+    ['core', 'cli', 'create-bunway'].map((name) =>
+      Bun.file(join(root, 'packages', name, 'package.json')).json(),
+    ),
+  )
+
+  for (const manifest of manifests) {
+    expect(manifest.description.length).toBeGreaterThan(40)
+    expect(manifest.keywords).toContain('bunway')
+    expect(manifest.keywords).toContain('bun')
+    expect(manifest.homepage).toStartWith('https://djrobby.github.io/bunway')
+    expect(manifest.repository.url).toBe('git+https://github.com/djrobby/bunway.git')
+    expect(manifest.bugs.url).toBe('https://github.com/djrobby/bunway/issues')
+    expect(manifest.engines.bun).toBe('>=1.4.0')
+  }
+})
+
 test('release authenticates before changing versions or publishing', async () => {
   const release = await Bun.file(join(root, 'scripts/release.ts')).text()
   const authentication = release.indexOf('await ensureNpmAuthentication()')

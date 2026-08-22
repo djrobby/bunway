@@ -1,6 +1,29 @@
 {
   "name": "@bunway/core",
-  "version": "0.1.0-preview.3",
+  "version": "0.1.0-preview.4",
+  "description": "Thin Bun-native runtime primitives for Bunway Jobs, Realtime, Audit, Messaging, Storage, and configuration.",
+  "keywords": [
+    "bun",
+    "bunway",
+    "elysia",
+    "drizzle",
+    "postgresql",
+    "jobs",
+    "realtime",
+    "typescript"
+  ],
+  "homepage": "https://djrobby.github.io/bunway/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djrobby/bunway.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/djrobby/bunway/issues"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
+  },
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

@@ -15,7 +15,11 @@ import {
   developmentNotice,
 } from "../packages/cli/src/dev";
 import { consoleCommand } from "../packages/cli/src/console";
-import { addDatabase, databaseConfig } from "../packages/cli/src/databases";
+import {
+  addDatabase,
+  databaseConfig,
+  ensureDatabaseDriver,
+} from "../packages/cli/src/databases";
 import { generateAuth, normalizeAuthOptions } from "../packages/cli/src/auth";
 import { generateAudit } from "../packages/cli/src/audit";
 import { cliVersion } from "../packages/cli/src/version";
@@ -113,6 +117,27 @@ describe("critical generation flow", () => {
         ),
       ).text(),
     ).toContain("data-[active=true]:bg-sidebar-accent");
+  });
+
+  test("installs the PostgreSQL migration driver when the application is missing it", async () => {
+    const root = await mkdtemp(join(tmpdir(), "bunway-postgres-install-"));
+    const path = join(root, "app");
+    await createProject(path, { install: false, apiOnly: true });
+    expect(await Bun.file(join(path, "node_modules/pg/package.json")).exists()).toBe(false);
+
+    await ensureDatabaseDriver("postgres", path);
+
+    expect(await Bun.file(join(path, "node_modules/pg/package.json")).exists()).toBe(true);
+  }, 30_000);
+
+  test("allows postgres.js as the explicit migration driver while defaulting to pg", async () => {
+    const root = await mkdtemp(join(tmpdir(), "bunway-postgres-driver-"));
+    const path = join(root, "app");
+    await createProject(path, { install: false, postgresDriver: "postgres" });
+    const manifest = await Bun.file(join(path, "package.json")).json();
+
+    expect(manifest.devDependencies.postgres).toBe("latest");
+    expect(manifest.devDependencies.pg).toBeUndefined();
   });
 
   test("creates an API-only application without a web workspace", async () => {

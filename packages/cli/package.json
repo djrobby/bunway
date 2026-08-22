@@ -1,6 +1,29 @@
 {
   "name": "@bunway/cli",
-  "version": "0.1.0-preview.3",
+  "version": "0.1.0-preview.4",
+  "description": "Rails-inspired Bunway CLI for creating, generating, migrating, and running Bun, Elysia, Drizzle, and SvelteKit applications.",
+  "keywords": [
+    "bun",
+    "bunway",
+    "cli",
+    "framework",
+    "elysia",
+    "drizzle",
+    "sveltekit",
+    "scaffolding"
+  ],
+  "homepage": "https://djrobby.github.io/bunway/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/djrobby/bunway.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/djrobby/bunway/issues"
+  },
+  "engines": {
+    "bun": ">=1.4.0"
+  },
   "type": "module",
   "bin": {
     "bunway": "./src/bin.ts"

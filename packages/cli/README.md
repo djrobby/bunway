@@ -29,6 +29,9 @@ bunway db:migrate
 bunway dev
 ```
 
+PostgreSQL migration tooling defaults to `pg`; pass `--postgres-driver=postgres` to `bunway new` or
+`bunway db:add` to select Postgres.js. Application queries continue to use Bun.SQL.
+
 ## Essential commands
 
 ```sh

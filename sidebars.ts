@@ -7,7 +7,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Get started",
       collapsed: false,
-      items: ["getting-started", "first-app", "project-structure"],
+      items: ["getting-started", "first-app", "request-lifecycle", "project-structure"],
     },
     {
       type: "category",
