@@ -26,12 +26,16 @@ container, proprietary frontend, or custom RPC protocol.
 - PostgreSQL Jobs, typed SSE/WebSocket channels, generated Better Auth, durable Audit, and queued Mail/SMS
 - Bun tests and conventional Nginx/systemd deployment without requiring Redis or containers
 
-The [documentation](https://bunway.dev) is organized for learning, building, and exact reference. Start
+The [documentation](https://djrobby.github.io/bunway/) is organized for learning, building, and exact reference. Start
 with [Getting started](./docs/getting-started.md), build the [Showcase](./docs/showcase/index.md), or use
 the [CLI reference](./docs/cli.md) and [Architecture](./docs/architecture.md).
 
 Each published package also includes a focused npm README for `@bunway/core`, `@bunway/cli`, and
 `create-bunway` so developers can understand its role without first navigating the monorepo.
+
+Documentation deploys to [GitHub Pages](https://djrobby.github.io/bunway/) from the `master` branch
+through `.github/workflows/pages.yml`. The repository's Pages source must be set to **GitHub Actions**;
+the generated `build/` directory is uploaded as an artifact and is not committed.
 
 ## Repository development
 

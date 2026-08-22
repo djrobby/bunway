@@ -1,6 +1,6 @@
 # @bunway/cli
 
-The command-line experience for [Bunway](https://bunway.dev), a lightweight, Rails-inspired full-stack
+The command-line experience for [Bunway](https://djrobby.github.io/bunway/), a lightweight, Rails-inspired full-stack
 framework for Bun.
 
 Bunway turns a modern Bun stack into a fast, coherent application workflow:
@@ -57,5 +57,4 @@ Everything is intended to be opened, read, and changed.
 - optional Realtime, Auth, Audit, Messaging, and Storage generators
 
 Run `bunway help` for the complete command summary or visit the
-[Bunway documentation](https://bunway.dev).
-
+[Bunway documentation](https://djrobby.github.io/bunway/).

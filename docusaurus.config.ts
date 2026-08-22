@@ -5,8 +5,8 @@ const config: Config = {
   title: 'Bunway',
   tagline: 'Rails-inspired productivity for Bun, Elysia, Drizzle, and SvelteKit',
   favicon: 'img/favicon.svg',
-  url: 'https://bunway.dev',
-  baseUrl: '/',
+  url: 'https://djrobby.github.io',
+  baseUrl: '/bunway/',
   onBrokenLinks: 'throw',
   presets: [
     [
@@ -25,7 +25,7 @@ const config: Config = {
       items: [
         { to: '/', label: 'Docs', position: 'left' },
         { to: '/showcase', label: 'Showcase', position: 'left' },
-        { href: 'https://github.com/bunway/bunway', label: 'GitHub', position: 'right' },
+        { href: 'https://github.com/djrobby/bunway', label: 'GitHub', position: 'right' },
       ],
     },
     footer: {

@@ -1,6 +1,6 @@
 # create-bunway
 
-Create a new [Bunway](https://bunway.dev) application in one command.
+Create a new [Bunway](https://djrobby.github.io/bunway/) application in one command.
 
 Bunway is a lightweight, Rails-inspired framework for Bun that combines Elysia, Drizzle, PostgreSQL,
 Eden Treaty, SvelteKit, Svelte 5, Tailwind CSS, and shadcn-svelte while keeping the generated code
@@ -31,5 +31,5 @@ bun create bunway shop --no-install
 ```
 
 The generated project is a conventional Bun application, not a black box. Continue with the
-[getting-started guide](https://bunway.dev/getting-started) or explore the
-[Bunway documentation](https://bunway.dev).
+[getting-started guide](https://djrobby.github.io/bunway/getting-started) or explore the
+[Bunway documentation](https://djrobby.github.io/bunway/).

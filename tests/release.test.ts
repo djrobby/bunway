@@ -28,7 +28,7 @@ test('every published package has package-specific npm documentation', async () 
   expect(readmes[0]).toContain('# @bunway/core')
   expect(readmes[1]).toContain('# @bunway/cli')
   expect(readmes[2]).toContain('# create-bunway')
-  for (const readme of readmes) expect(readme).toContain('https://bunway.dev')
+  for (const readme of readmes) expect(readme).toContain('https://djrobby.github.io/bunway/')
 })
 
 test('release authenticates before changing versions or publishing', async () => {

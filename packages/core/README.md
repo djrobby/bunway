@@ -1,6 +1,6 @@
 # @bunway/core
 
-The small runtime behind [Bunway](https://bunway.dev), a Rails-inspired application framework built
+The small runtime behind [Bunway](https://djrobby.github.io/bunway/), a Rails-inspired application framework built
 for Bun without hiding Bun, Elysia, Drizzle, PostgreSQL, or SvelteKit.
 
 Bunway puts most of its value in conventions and generated application code. `@bunway/core` contains
@@ -51,5 +51,4 @@ This package deliberately stays small. Application routes remain ordinary Elysia
 queries remain ordinary Drizzle code, and PostgreSQL remains directly available. If Bunway disappeared,
 your application should still be understandable.
 
-See the [Bunway documentation](https://bunway.dev) for Jobs, Realtime, Storage, and Messaging guides.
-
+See the [Bunway documentation](https://djrobby.github.io/bunway/) for Jobs, Realtime, Storage, and Messaging guides.
