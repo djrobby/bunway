@@ -37,7 +37,7 @@ async function main() {
       database: args
         .find((value) => value.startsWith("--database="))
         ?.slice(11) as
-        "postgres" | "mysql" | "sqlite" | "pocketbase" | undefined,
+        "postgres" | "mysql" | "sqlite" | undefined,
     });
   if (command === "dev") return dev();
   if (command === "routes") return routes();
@@ -50,7 +50,7 @@ async function main() {
     return addDatabase(
       args[0],
       args.find((value) => value.startsWith("--adapter="))?.slice(10) as
-        "postgres" | "mysql" | "sqlite" | "pocketbase" | undefined,
+        "postgres" | "mysql" | "sqlite" | undefined,
       process.cwd(),
     );
   if (command === "db:list") return listDatabases();
@@ -293,7 +293,7 @@ async function help() {
   console.log(`Bunway ${await cliVersion()}
 
   bunway --version | bunway -v
-  bunway new <name> [--api-only] [--database=postgres|mysql|sqlite|pocketbase]
+  bunway new <name> [--api-only] [--database=postgres|mysql|sqlite]
   bunway dev
   bunway g model <Name> [field:type...]
   bunway g resource <Name> [field:type...]
@@ -309,7 +309,7 @@ async function help() {
   bunway g auth [--password] [--magic-link] [--passkeys] [--oauth=google,github,microsoft,apple]
                 [--mfa=totp,backup-codes,email-otp,trusted-devices] [--bearer] [--api-key] [--database=<name>]
   bunway g realtime <notifications|status|progress|stream|dashboard|chat|presence|custom> [Name] [--transport=sse|websocket]
-  bunway db:add <name> --adapter=postgres|mysql|sqlite|pocketbase
+  bunway db:add <name> --adapter=postgres|mysql|sqlite
   bunway db:list
   bunway db:migrate [--database=<name>|--all]
   bunway routes

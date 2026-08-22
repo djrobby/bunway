@@ -40,9 +40,9 @@ The August 2026 registry marks TypeScript 7 as latest, and Bun 1.4 supports its 
 
 ## Drizzle Kit owns SQL migrations
 
-The CLI runs Drizzle Kit's `generate` and `migrate` commands with the selected database config. This
-keeps one visible migration mechanism across PostgreSQL, MySQL, and SQLite. PocketBase retains its own
-`pb_migrations` mechanism.
+The CLI runs Drizzle Kit's `generate` command with the selected database config, then applies those
+migration files through Drizzle ORM using Bun.SQL, mysql2, or `bun:sqlite`. This keeps one visible SQL
+migration format while preserving actionable database errors.
 
 ## Named databases keep native clients and migrations
 
@@ -52,10 +52,6 @@ static client exports, and one Drizzle Kit config each. The CLI invokes Drizzle 
 than creating a migration format or implying cross-database transactions. PostgreSQL uses Drizzle over
 Bun.SQL, SQLite uses Drizzle over `bun:sqlite`, and MySQL uses Drizzle's currently documented `mysql2`
 driver. Engine-specific Drizzle features remain available.
-
-PocketBase is a native-client adapter rather than a SQL/Drizzle adapter. It exports the official SDK and
-keeps PocketBase's collection and `pb_migrations` source of truth. Bunway does not disguise its record
-API as Drizzle or run its migrations through Drizzle Kit.
 
 ## Relationship scaffold controls
 
@@ -151,9 +147,7 @@ Generated PostgreSQL tables store UUIDv7 values in PostgreSQL's ordinary `uuid` 
 `$defaultFn` calls Bun's dependency-free `Bun.randomUUIDv7()` before inserts, avoiding a PostgreSQL 18
 floor, extensions, or a Bunway compatibility function. This default applies to inserts made through
 Drizzle; direct SQL callers must provide an ID or explicitly choose their own database default.
-MySQL stores the same UUIDv7 in `varchar(36)` and SQLite stores it as text. PocketBase is the explicit
-exception because its system primary key is a required 15-character record ID; applications may add a
-separate unique UUIDv7 field without redefining PocketBase's primary key.
+MySQL stores the same UUIDv7 in `varchar(36)` and SQLite stores it as text.
 `BUNWAY_ID_TYPE` provides the
 application generator default and `--id-type` provides a per-resource override. When generating a
 relationship, Bunway reads the referenced Drizzle schema to choose UUID, integer, or bigint; it does not

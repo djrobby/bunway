@@ -6,6 +6,8 @@ title: PostgreSQL adapter
 
 PostgreSQL is Bunway's default and uses Drizzle's `bun-sql` driver over Bun.SQL. `DATABASE_URL` configures
 primary; named connections conventionally use `<NAME>_DATABASE_URL`.
+New applications default to an app-specific `<app_name>_development` database. Create that empty
+database or edit `DATABASE_URL` before the first migration.
 
 Drizzle Kit generates the SQL migration files. Bunway applies PostgreSQL migrations through Drizzle
 ORM's Bun.SQL migrator, which keeps the operation Bun-native and reports the underlying database error.

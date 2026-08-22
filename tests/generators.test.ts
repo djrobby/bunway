@@ -18,6 +18,7 @@ import { consoleCommand } from "../packages/cli/src/console";
 import {
   addDatabase,
   databaseConfig,
+  migrateDatabases,
   migrationError,
 } from "../packages/cli/src/databases";
 import { generateAuth, normalizeAuthOptions } from "../packages/cli/src/auth";
@@ -33,14 +34,16 @@ async function app() {
 
 describe("critical generation flow", () => {
   test("reports the PostgreSQL error hidden by stable Drizzle Kit migrate", () => {
-    const error = Object.assign(new Error('relation "products" already exists'), {
+    const cause = Object.assign(new Error('relation "products" already exists'), {
       code: "42P07",
       detail: "A relation with that name already exists.",
       hint: "Reconcile the database migration history.",
     });
+    const error = new Error("Failed query: CREATE TABLE products", { cause });
     expect(migrationError(error)).toContain('Migration failed: relation "products" already exists');
-    expect(migrationError(error)).toContain("PostgreSQL 42P07");
+    expect(migrationError(error)).toContain("Database error 42P07");
     expect(migrationError(error)).toContain("A relation with that name already exists.");
+    expect(migrationError(error)).toContain("already contains this table");
   });
   test("reports the installed CLI package version", async () => {
     const manifest = await Bun.file(
@@ -116,8 +119,11 @@ describe("critical generation flow", () => {
     ).text();
     expect(sidebar).toContain("group-data-[collapsible=icon]:hidden");
     const manifest = await Bun.file(join(path, "package.json")).json();
+    const env = await Bun.file(join(path, ".env.example")).text();
     const webManifest = await Bun.file(join(path, "web", "package.json")).json();
     expect(manifest.devDependencies.pg).toBeUndefined();
+    expect(manifest.devDependencies.typescript).toBe("7.0.2");
+    expect(env).toContain("/shop_development");
     expect(webManifest.scripts.dev).toBe("bun --bun vite");
     expect(
       await Bun.file(
@@ -140,37 +146,40 @@ describe("critical generation flow", () => {
     expect(manifest.scripts.build).toContain("bun build src/app.ts");
   });
 
-  test("creates SQLite, MySQL, and PocketBase primary applications", async () => {
-    for (const adapter of ["sqlite", "mysql", "pocketbase"] as const) {
+  test("creates SQLite and MySQL primary applications", async () => {
+    for (const adapter of ["sqlite", "mysql"] as const) {
       const root = await mkdtemp(join(tmpdir(), `bunway-${adapter}-`));
       const path = join(root, "app");
       await createProject(path, { install: false, database: adapter });
       const index = await Bun.file(join(path, "src/db/index.ts")).text();
-      expect(index).toContain(
-        adapter === "sqlite"
-          ? "sqliteDrizzle"
-          : adapter === "mysql"
-            ? "mysqlDrizzle"
-            : "new PocketBase",
-      );
+      expect(index).toContain(adapter === "sqlite" ? "sqliteDrizzle" : "mysqlDrizzle");
       const manifest = await Bun.file(join(path, "package.json")).json();
       expect(manifest.devDependencies.pg).toBeUndefined();
       if (adapter === "mysql")
         expect(manifest.dependencies.mysql2).toBe("latest");
-      if (adapter === "pocketbase") {
-        expect(manifest.dependencies.pocketbase).toBe("latest");
-        expect(await Bun.file(join(path, "drizzle.config.ts")).exists()).toBe(
-          false,
-        );
-      }
     }
   });
+
+  test("generates and applies SQLite migrations with bun:sqlite", async () => {
+    const root = await mkdtemp(join(tmpdir(), "bunway-sqlite-migrate-"));
+    const path = join(root, "app");
+    await createProject(path, { database: "sqlite", apiOnly: true });
+    await generateResource("Product", ["name:string"], path);
+    await migrateDatabases(undefined, false, path);
+    const { Database } = await import("bun:sqlite");
+    const database = new Database(join(path, "storage/development.sqlite"));
+    const tables = database
+      .query("select name from sqlite_master where type = 'table'")
+      .all() as { name: string }[];
+    database.close();
+    expect(tables.map(({ name }) => name)).toContain("products");
+    expect(tables.map(({ name }) => name)).toContain("storage_blobs");
+  }, 30_000);
 
   test("adds named mixed databases and generates adapter-aware schemas", async () => {
     const path = await app();
     await addDatabase("analytics", "sqlite", path);
     await addDatabase("legacy", "mysql", path);
-    await addDatabase("content", "pocketbase", path);
     await generateModel("Event", ["name:string", "payload:json"], path, {
       database: "analytics",
     });
@@ -182,7 +191,6 @@ describe("critical generation flow", () => {
       "primary",
       "analytics",
       "legacy",
-      "content",
     ]);
     const analyticsSchema = await Bun.file(
       join(path, "src/db/analytics/schema/events.ts"),
@@ -197,7 +205,6 @@ describe("critical generation flow", () => {
     const index = await Bun.file(join(path, "src/db/index.ts")).text();
     expect(index).toContain("export const analytics");
     expect(index).toContain("export const legacy");
-    expect(index).toContain("export const content = new PocketBase");
   });
 
   test("adds a Bun.SQL PostgreSQL database without a client package", async () => {
@@ -816,6 +823,28 @@ describe("critical generation flow", () => {
     expect(page).toContain("{record.tagsIds.length}");
     expect(details).toContain("{#each record.tagsIds as relatedId}");
     expect(details).toContain("href={`/tags/${relatedId}`}");
+  });
+
+  test("generates the showcase polymorphic relationship for MySQL and SQLite", async () => {
+    for (const adapter of ["mysql", "sqlite"] as const) {
+      const root = await mkdtemp(join(tmpdir(), `bunway-showcase-${adapter}-`));
+      const path = join(root, "app");
+      await createProject(path, { install: false, database: adapter });
+      await generateResource("Tag", ["name:string"], path);
+      await generateResource(
+        "Post",
+        ["title:string", "tags:many_to_many:as=taggable:through=post_taggings"],
+        path,
+        { ui: true },
+      );
+      const joinSchema = await Bun.file(
+        join(path, "src/db/schema/post-taggings.ts"),
+      ).text();
+      const schemaIndex = await Bun.file(join(path, "src/db/schema/index.ts")).text();
+      expect(joinSchema).toContain(adapter === "mysql" ? "mysqlTable" : "sqliteTable");
+      expect(joinSchema).toContain("taggableType");
+      expect(schemaIndex).toContain("export { postTaggings } from './post-taggings'");
+    }
   });
 
   test("defaults IDs to UUID and inherits target ID types for references", async () => {

@@ -154,8 +154,6 @@ export const audit = {
 export async function generateAudit(options: AuditOptions = {}, cwd = process.cwd()) {
   const databaseName = options.database ?? 'primary'
   const selected = await database(databaseName, cwd)
-  if (selected.adapter === 'pocketbase')
-    throw new CliError('Bunway Audit requires a Drizzle database: postgres, mysql, or sqlite')
   const idType = options.idType ?? 'uuid'
   const idEncoding = options.idEncoding ?? 'standard'
   if (idType !== 'uuid' && options.idEncoding)

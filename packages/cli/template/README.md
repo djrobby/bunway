@@ -6,9 +6,9 @@ Requires Bun 1.4 or newer. Node.js is not required; application and tool process
 Backend typechecking uses TypeScript 7; the SvelteKit workspace runs the
 TypeScript 7 native checker through `svelte-check --tsgo`.
 
-PostgreSQL applications use Bun.SQL at runtime and include `pg` only for Drizzle Kit's migration
-connection.
 PostgreSQL migrations are generated with Drizzle Kit and applied through Drizzle ORM with Bun.SQL.
+Use an existing empty database for a new application; PostgreSQL and MySQL database names default to
+`<app_name>_development`.
 
 Realtime channels use `channel()` and the included `realtimeRoutes`. Generate a recipe with
 `bunway g realtime status Order` or `bunway g realtime chat Room`.

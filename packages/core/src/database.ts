@@ -1,6 +1,6 @@
 let client: InstanceType<typeof Bun.SQL> | undefined
 
-export type DatabaseAdapter = 'postgres' | 'mysql' | 'sqlite' | 'pocketbase'
+export type DatabaseAdapter = 'postgres' | 'mysql' | 'sqlite'
 export type DatabaseConnection = {
   adapter: DatabaseAdapter
   url: string | undefined

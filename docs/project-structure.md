@@ -9,7 +9,7 @@ src/
 ├── app.ts                 Elysia composition and exported App type
 ├── db/
 │   ├── config.ts          named database declarations
-│   ├── index.ts           Drizzle or PocketBase clients
+│   ├── index.ts           Drizzle database clients
 │   ├── schema/            primary Drizzle schema
 │   └── migrations/        primary Drizzle Kit SQL
 ├── routes/                composable Elysia route modules
@@ -27,7 +27,7 @@ drizzle.config.ts          primary Drizzle Kit configuration
 ```
 
 Additional SQL databases live at `src/db/<name>/schema` and `src/db/<name>/migrations`, with a matching
-`drizzle.<name>.config.ts`. PocketBase instead owns collections and migrations.
+`drizzle.<name>.config.ts`.
 
 ## Generated code is yours
 

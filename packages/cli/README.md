@@ -31,6 +31,8 @@ bunway dev
 
 Drizzle Kit generates PostgreSQL migration SQL, and Drizzle ORM applies it through Bun.SQL. Neither
 `pg` nor Postgres.js is required by Bunway migration commands.
+MySQL and SQLite use the same generated migration files with Drizzle's `mysql2` and `bun:sqlite`
+migrators respectively.
 
 ## Essential commands
 

@@ -20,7 +20,7 @@ container, proprietary frontend, or custom RPC protocol.
 
 ## What it provides
 
-- PostgreSQL by default; named PostgreSQL, MySQL, SQLite, and PocketBase connections
+- PostgreSQL by default; PostgreSQL, MySQL, and SQLite connections
 - model, validated API resource, full SvelteKit scaffold, Job, Realtime, Auth, Audit, Mailer, and SMS generators
 - relationships, polymorphic joins, local/S3-compatible attachments, soft deletion, and UUIDv7 IDs
 - PostgreSQL Jobs, typed SSE/WebSocket channels, generated Better Auth, durable Audit, and queued Mail/SMS

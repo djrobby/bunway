@@ -58,6 +58,11 @@ test('showcase guide stays aligned with the maintained test application', async 
   ).text()
 
   expect(showcase).not.toMatch(/\bListings?\b/)
+  expect(showcase).toContain('PostgreSQL (default)')
+  expect(showcase).toContain('### MySQL')
+  expect(showcase).toContain('### SQLite')
+  expect(showcase).toContain('skip only those durable-queue checks')
+  expect(showcase).not.toMatch(/PocketBase/i)
   for (const destination of [
     '/categories',
     '/products',

@@ -7,6 +7,10 @@ title: 4. Build the Jobs and Realtime showcase
 This step builds the complete `/realtime` page from the maintained test app: notifications, live order
 status, Job progress, dashboard counters, and WebSocket chat.
 
+The interactive page runs the Job handler immediately, so it works with PostgreSQL, MySQL, and SQLite.
+Only `performLater()` and `bunway worker` are PostgreSQL-only because the durable queue uses PostgreSQL
+locking.
+
 ## 1. Generate the starting files
 
 ```sh
@@ -346,9 +350,10 @@ Insert this before `// bunway:resources` in `web/src/lib/resources.ts`:
 
 Restart `bunway dev`, open `http://localhost:5173/realtime` in two windows, and test every card.
 
-The visible demo uses `performNow()` because the Realtime broker is process-local. To verify durable
-execution separately, change a call to `processDemoFile.performLater({})`, start `bunway worker` in a
-second terminal, and inspect the completed Job. A separate worker cannot currently publish to an SSE
-client connected to the API process.
+The visible demo uses `performNow()` because the Realtime broker is process-local. On PostgreSQL, verify
+durable execution separately by changing a call to `processDemoFile.performLater({})`, starting
+`bunway worker` in a second terminal, and inspecting the completed Job. Skip that durable-queue check
+on MySQL and SQLite. A separate worker cannot currently publish to an SSE client connected to the API
+process.
 
 Next: [add Authentication](./05-auth.md).

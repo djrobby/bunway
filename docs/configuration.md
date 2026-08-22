@@ -13,7 +13,7 @@ after changing `.env`. Empty provider values are not secrets and are safe in `.e
 | Core | `CORS_ORIGIN` | Browser origin; `http://localhost:5173` |
 | Core | `DEBUG` | Show unexpected CLI stack traces when truthy |
 | Database | `DATABASE_URL` | Required for primary PostgreSQL/MySQL; SQLite has a file default |
-| Database | `<NAME>_DATABASE_URL` | Required for named server/PocketBase databases |
+| Database | `<NAME>_DATABASE_URL` | Required for named PostgreSQL/MySQL databases |
 | Generators | `BUNWAY_ID_TYPE` | `uuid`; alternatives `integer`, `bigint` |
 | Generators | `BUNWAY_ID_ENCODING` | `standard`; alternative `base64url` for UUIDs |
 | Jobs | `BUNWAY_JOBS_DATABASE` | Named PostgreSQL database; `primary` |

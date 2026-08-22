@@ -428,4 +428,8 @@ Restart `bunway dev`. Open both sidebar links. Record an Audit event, use the re
 Mail/SMS now, then send them later. Development delivery prints message content to the API console;
 Audit stores delivery outcomes but never bodies or authentication secrets.
 
+PostgreSQL users can also exercise the **send later** buttons with `bunway worker`. On MySQL and SQLite,
+use **send now** only: immediate Mail/SMS and Audit work on those adapters, while queued delivery uses
+the PostgreSQL Jobs backend.
+
 Next: [test, build, and deploy](./07-test-deploy.md).

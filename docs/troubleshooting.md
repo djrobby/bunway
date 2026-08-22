@@ -13,7 +13,7 @@ on `PATH`.
 
 Check `.env`, run `bunway db:list`, and ensure the selected server exists. Use
 `bunway db:migrate --database=name`; `--all` stops at the first failure and is not a distributed
-transaction. PocketBase owns its migrations and does not use Drizzle Kit.
+transaction.
 
 ## Generator says a file exists
 

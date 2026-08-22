@@ -7,7 +7,7 @@ title: Bunway
 # Rails-like productivity. Ordinary Bun code.
 
 Bunway is a small, Rails-inspired productivity layer for Bun. It generates readable applications made
-from Elysia, PostgreSQL by default (with MySQL, SQLite, and PocketBase options), Drizzle ORM, Eden
+from Elysia, PostgreSQL by default (with MySQL and SQLite options), Drizzle ORM, Eden
 Treaty, SvelteKit, Svelte 5, Tailwind CSS, and
 shadcn-svelte. Bunway does not replace those tools or hide them behind controllers, repositories, or a
 custom ORM.

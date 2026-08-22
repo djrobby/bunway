@@ -21,8 +21,3 @@ All generators support the `generate` and `g` command forms. They refuse to over
 For field syntax and resource output, see [Resources and scaffolding](./scaffolding.md). For every flag,
 see the [CLI reference](./cli.md). Generator edits are explicit: schema and route barrel files, the job
 registry, app composition, and frontend resource navigation are updated rather than discovered at runtime.
-
-:::note PocketBase
-PocketBase is not a Drizzle dialect. SQL model/resource/scaffold generation does not pretend otherwise;
-create PocketBase collections with PocketBase and use its SDK directly.
-:::

@@ -9,7 +9,7 @@ No dates here are promises. Developer feedback decides what follows v0.1.
 ## Available now
 
 - project creation, development, route listing, console, and API-only mode
-- PostgreSQL/MySQL/SQLite Drizzle databases, PocketBase clients, and named mixed databases
+- PostgreSQL/MySQL/SQLite Drizzle databases and named mixed databases
 - model/resource/scaffold generators with relationships, attachments, and soft deletion
 - PostgreSQL Jobs and process-local typed SSE/WebSocket Realtime
 - generated Better Auth, Audit, Mail/SMS, and local/S3-compatible Storage integrations

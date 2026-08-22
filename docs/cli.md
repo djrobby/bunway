@@ -8,7 +8,7 @@ title: CLI reference
 | Command | Syntax summary |
 | --- | --- |
 | Version | `bunway --version`, `bunway -v` |
-| Create | `bunway new <name> [--no-install] [--api-only] [--database=postgres\|mysql\|sqlite\|pocketbase]` |
+| Create | `bunway new <name> [--no-install] [--api-only] [--database=postgres\|mysql\|sqlite]` |
 | Develop | `bunway dev`, `bunway routes`, `bunway console` / `c` |
 | Generate | `bunway generate` / `g <kind> ...` |
 | Database | `bunway db:add`, `db:list`, `db:migrate` |
@@ -42,7 +42,7 @@ are preferred for scripts and coding agents.
 | `bunway new <name> --api-only`                 | Create an API application without SvelteKit.                     |
 | `bunway dev`                                   | Start the Elysia API and SvelteKit development server.           |
 | `bunway routes`                                | Print registered Elysia methods and paths.                       |
-| `bunway db:add <name> --adapter=<adapter>`     | Add a named PostgreSQL, MySQL, SQLite, or PocketBase connection. |
+| `bunway db:add <name> --adapter=<adapter>`     | Add a named PostgreSQL, MySQL, or SQLite connection. |
 | `bunway db:list`                               | List configured databases without credentials.                   |
 | `bunway db:migrate [--database=<name>\|--all]` | Generate and apply migrations for selected SQL databases.        |
 | `bunway worker`                                | Start the PostgreSQL job worker.                                 |

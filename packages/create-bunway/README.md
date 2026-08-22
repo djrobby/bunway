@@ -27,7 +27,6 @@ queries use Bun.SQL with either choice.
 ```sh
 bun create bunway shop --database=sqlite
 bun create bunway shop --database=mysql
-bun create bunway shop --database=pocketbase
 ```
 
 Skip dependency installation when another workflow will install later:

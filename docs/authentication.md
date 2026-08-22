@@ -22,7 +22,7 @@ bunway g auth --password --magic-link \
 
 Other supported flags are `--passkeys`, `--bearer`, `--api-key`, and `--database=accounts`. Bearer tokens and API keys are intended for non-browser API clients; the generated browser UI continues to use cookies.
 
-The generator creates ordinary Better Auth configuration, a Drizzle schema, an Elysia plugin and protected route example, and Svelte pages for the selected features. Pass `--database=<name>` to use any configured PostgreSQL, MySQL, or SQLite Drizzle database. PocketBase is not supported by Better Auth's Drizzle adapter.
+The generator creates ordinary Better Auth configuration, a Drizzle schema, an Elysia plugin and protected route example, and Svelte pages for the selected features. Pass `--database=<name>` to use any configured PostgreSQL, MySQL, or SQLite Drizzle database.
 
 ## Environment
 

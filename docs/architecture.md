@@ -35,7 +35,7 @@ Storage metadata ──► Drizzle     Storage objects ──► local disk or S
 | Concern | Owner | Bunway boundary |
 | --- | --- | --- |
 | HTTP/validation | Elysia | generated routes; no controller/router layer |
-| data queries | Drizzle, Bun.SQL, PocketBase SDK | no Bunway ORM/repository |
+| data queries | Drizzle and native database clients | no Bunway ORM/repository |
 | browser | SvelteKit/Svelte | no Bunway frontend runtime |
 | API types | Eden Treaty | inferred; no duplicate DTO protocol |
 | async execution | Jobs | durable PostgreSQL queue |
@@ -52,8 +52,8 @@ Applications explicitly publish when a browser needs an update.
 
 `src/db/config.ts` declares `primary` and optional named databases. Primary keeps the shallow schema and
 migrations directories; additional SQL databases have their own directories and Drizzle config.
-PostgreSQL uses Drizzle over Bun.SQL, MySQL uses mysql2, SQLite uses `bun:sqlite`, and PocketBase uses its
-official SDK and migration system. Relationships never cross databases.
+PostgreSQL uses Drizzle over Bun.SQL, MySQL uses mysql2, and SQLite uses `bun:sqlite`. Relationships
+never cross databases.
 
 Jobs choose a named PostgreSQL database through `BUNWAY_JOBS_DATABASE`. Auth and Audit import their
 selected database explicitly. Bunway does not fake cross-database transactions.
@@ -69,6 +69,5 @@ proprietary protocol are absent.
 
 ## Current limitations
 
-Realtime is process-local. Jobs require PostgreSQL. PocketBase does not support SQL generators, Drizzle
-migrations, Jobs storage, or SQL Audit/Auth generation. Local storage needs persistent shared disk when
+Realtime is process-local. Jobs require PostgreSQL. Local storage needs persistent shared disk when
 processes or hosts multiply.

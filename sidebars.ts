@@ -18,7 +18,7 @@ const sidebars: SidebarsConfig = {
         {
           type: "category",
           label: "Database adapters",
-          items: ["databases/postgresql", "databases/mysql", "databases/sqlite", "databases/pocketbase"],
+          items: ["databases/postgresql", "databases/mysql", "databases/sqlite"],
         },
         "jobs", "realtime", "authentication", "audit", "messaging", "frontend",
       ],

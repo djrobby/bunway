@@ -14,7 +14,7 @@ Targets must exist before relationships point to them, so run these in order:
 ```sh
 bunway g scaffold User name:string email:string:unique bio:text:optional avatar:image:optional
 bunway g scaffold Tag name:string
-bunway g scaffold Post title:string slug:string:unique excerpt:text:optional body:text user:belongs_to published:boolean publishedAt:timestamptz:optional tags:many_to_many:as=taggable:through=post_taggings cover:image:optional
+bunway g scaffold Post title:string slug:string:unique excerpt:text:optional body:text user:belongs_to published:boolean publishedAt:timestamp:optional tags:many_to_many:as=taggable:through=post_taggings cover:image:optional
 bunway g scaffold Comment body:text post:belongs_to user:belongs_to approved:boolean
 bunway db:migrate
 ```
@@ -48,11 +48,30 @@ polymorphic example. Ordinary many-to-many remains a separate supported pattern 
 
 ## 2. Add nested comments
 
-Open `src/db/schema/comments.ts`. Add `type AnyPgColumn` to the import from
-`drizzle-orm/pg-core`, then add this field after `userId`:
+Open `src/db/schema/comments.ts`. Add the matching column type and builder to its existing Drizzle core
+import, then add `parentId` after `userId`.
+
+PostgreSQL:
 
 ```ts
 parentId: uuid('parentId').references((): AnyPgColumn => comments.id, {
+  onDelete: 'cascade',
+}),
+```
+
+MySQL (`AnyMySqlColumn` and `varchar` come from `drizzle-orm/mysql-core`):
+
+```ts
+parentId: varchar('parentId', { length: 36 }).references(
+  (): AnyMySqlColumn => comments.id,
+  { onDelete: 'cascade' },
+),
+```
+
+SQLite (`AnySQLiteColumn` and `text` come from `drizzle-orm/sqlite-core`):
+
+```ts
+parentId: text('parentId').references((): AnySQLiteColumn => comments.id, {
   onDelete: 'cascade',
 }),
 ```

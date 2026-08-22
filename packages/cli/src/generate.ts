@@ -262,10 +262,6 @@ export async function generateModel(
     : specs;
   const database = options.database ?? "primary";
   const { adapter } = await configuredDatabase(database, cwd);
-  if (adapter === "pocketbase")
-    throw new CliError(
-      "PocketBase collections are managed by PocketBase migrations or its dashboard; Bunway does not generate fake Drizzle schemas for PocketBase",
-    );
   const fields = await resolveRelationshipIdTypes(
     parseFields(modelSpecs),
     cwd,
@@ -403,10 +399,6 @@ export async function generateResource(
   const { singular, table, file } = names(raw);
   const database = options.database ?? "primary";
   const { adapter } = await configuredDatabase(database, cwd);
-  if (adapter === "pocketbase")
-    throw new CliError(
-      "PocketBase resource generation is not Drizzle-based. Define the PocketBase collection and use its native collection API.",
-    );
   if (adapter === "mysql" && options.softDelete)
     throw new CliError(
       "MySQL soft-delete resource generation is not yet supported; add the nullable timestamp and route conditions explicitly",

@@ -467,10 +467,6 @@ export const accountRoutes = new Elysia({ prefix: '/account' }).use(authPlugin).
 export async function generateAuth(raw: AuthOptions, cwd = process.cwd()) {
   const options = normalizeAuthOptions(raw);
   const selected = await database(options.database, cwd);
-  if (selected.adapter === "pocketbase")
-    throw new CliError(
-      "Better Auth scaffolding requires a Bunway Drizzle database: postgres, mysql, or sqlite",
-    );
   const schemaRoot = join(cwd, databaseDirectory(options.database), "schema");
   await write(
     join(schemaRoot, "auth.ts"),

@@ -46,4 +46,4 @@ Provider errors use the normal retry lifecycle. Messaging records one final fail
 
 Jobs use the named database in `BUNWAY_JOBS_DATABASE` (default `primary`). For example,
 `BUNWAY_JOBS_DATABASE=queue` reads `QUEUE_DATABASE_URL`. The selected connection must be PostgreSQL;
-MySQL, SQLite, and PocketBase application databases do not provide the queue's locking semantics.
+MySQL and SQLite application databases do not provide the queue's locking semantics.

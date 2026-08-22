@@ -14,63 +14,66 @@ import { db } from './index'
 import { categories, comments, posts, products, tags, users } from './schema'
 import { postTaggings } from './schema/post-taggings'
 
-const [category] = await db
-  .insert(categories)
-  .values({ name: 'Hardware' })
-  .returning()
+const ids = {
+  category: crypto.randomUUID(),
+  product: crypto.randomUUID(),
+  author: crypto.randomUUID(),
+  tag: crypto.randomUUID(),
+  post: crypto.randomUUID(),
+  rootComment: crypto.randomUUID(),
+  reply: crypto.randomUUID(),
+}
+
+await db.insert(categories).values({ id: ids.category, name: 'Hardware' })
 
 await db.insert(products).values({
   name: 'Mechanical Keyboard',
+  id: ids.product,
   price: '129.99',
   active: true,
-  categoryId: category.id,
+  categoryId: ids.category,
 })
 
-const [author] = await db
-  .insert(users)
-  .values({
+await db.insert(users).values({
+    id: ids.author,
     name: 'Bunway Author',
     email: `author-${crypto.randomUUID()}@example.test`,
     bio: 'Writes about building direct, Bun-native applications.',
   })
-  .returning()
 
-const [tag] = await db.insert(tags).values({ name: 'Bun' }).returning()
+await db.insert(tags).values({ id: ids.tag, name: 'Bun' })
 
-const [post] = await db
-  .insert(posts)
-  .values({
+await db.insert(posts).values({
+    id: ids.post,
     title: 'Building with Bunway',
     slug: `building-with-bunway-${crypto.randomUUID()}`,
     excerpt: 'A generated application remains ordinary Bun, Elysia, Drizzle, and SvelteKit.',
     body: 'Bunway supplies conventions and readable source code without hiding the underlying stack.',
-    userId: author.id,
+    userId: ids.author,
     published: true,
     publishedAt: new Date().toISOString(),
   })
-  .returning()
 
 await db.insert(postTaggings).values({
-  tagId: tag.id,
+  tagId: ids.tag,
   taggableType: 'Post',
-  taggableId: post.id,
+  taggableId: ids.post,
 })
 
-const [root] = await db
-  .insert(comments)
-  .values({
+await db.insert(comments).values({
+    id: ids.rootComment,
     body: 'The generated source is easy to follow.',
-    postId: post.id,
-    userId: author.id,
+    postId: ids.post,
+    userId: ids.author,
     approved: true,
   })
-  .returning()
 
 await db.insert(comments).values({
   body: 'And nested discussions are still ordinary relational data.',
-  postId: post.id,
-  userId: author.id,
-  parentId: root.id,
+  id: ids.reply,
+  postId: ids.post,
+  userId: ids.author,
+  parentId: ids.rootComment,
   approved: true,
 })
 
@@ -107,9 +110,12 @@ CRUD route.
 
 ## 3. Run the browser verification
 
-Exercise CRUD, upload/download, a queued job, same-process progress, WebSocket chat, password sign-in,
+Exercise CRUD, upload/download, same-process progress, WebSocket chat, password sign-in,
 TOTP, an Audit query, immediate console delivery, and queued console delivery. OAuth requires real
 credentials.
+
+On PostgreSQL, also exercise a queued Job, queued Mail/SMS, and `bunway worker`. On MySQL and SQLite,
+skip only those durable-queue checks.
 
 Use this exact checklist:
 
@@ -119,11 +125,12 @@ Use this exact checklist:
 4. `/realtime`: use every button, then verify chat in two browser windows.
 5. `/register`, `/login`, `/account/security`: register, sign in, and configure TOTP.
 6. `/examples/audit`: record a normal event and the secret-redaction example.
-7. `/examples/messaging`: send Mail/SMS now and later; inspect the API console and Audit cards.
+7. `/examples/messaging`: send Mail/SMS now and inspect the API console and Audit cards; on PostgreSQL,
+   also send later with a worker running.
 
 ## 4. Deploy
 
-For production, apply migrations once, supervise app and worker with systemd, and proxy through Nginx
+For production, apply migrations once, supervise the app (and the PostgreSQL worker, when used) with systemd, and proxy through Nginx
 with WebSocket upgrades and buffering disabled for SSE. Follow [Deploy to a VPS](../deployment.md) and
 the [production checklist](../production-checklist.md).
 
@@ -131,7 +138,7 @@ the [production checklist](../production-checklist.md).
 
 - Elysia + Drizzle resources and an Eden/SvelteKit UI
 - relationships and local/S3-compatible attachments
-- PostgreSQL Jobs, SSE progress, and WebSocket communication
+- SSE progress and WebSocket communication, plus PostgreSQL Jobs when PostgreSQL is selected
 - Better Auth password identity, OAuth integration points, TOTP, and backup codes
 - append-only Audit history and immediate/queued Mail/SMS
 
