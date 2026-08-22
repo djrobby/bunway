@@ -10,6 +10,7 @@ test('documentation targets the Bunway GitHub Pages project site', async () => {
   expect(config).toContain("url: 'https://djrobby.github.io'")
   expect(config).toContain("baseUrl: '/bunway/'")
   expect(config).toContain('https://github.com/djrobby/bunway')
+  expect(config).toContain('return { cache: false }')
   expect(workflow).toContain('branches: [master]')
   expect(workflow).toContain('path: build')
   expect(workflow).toContain('actions/deploy-pages@v4')

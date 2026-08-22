@@ -8,6 +8,15 @@ const config: Config = {
   url: 'https://djrobby.github.io',
   baseUrl: '/bunway/',
   onBrokenLinks: 'throw',
+  plugins: [
+    () => ({
+      name: 'bunway-bun-webpack-config',
+      configureWebpack() {
+        // Webpack's V8-serialized filesystem cache is not portable to Bun's runtime.
+        return { cache: false }
+      },
+    }),
+  ],
   presets: [
     [
       'classic',

@@ -83,7 +83,8 @@ for (const entry of packages) {
 await run(['bun', 'install'])
 await run(['bun', 'run', 'typecheck'])
 await run(['bun', 'run', 'test'])
-await run(['bun', 'run', 'docs:build'])
+
+console.log('\nDocumentation is verified and deployed by the GitHub Pages workflow.')
 
 for (const entry of packages) {
   await run(['bun', 'pm', 'pack', '--dry-run'], join(root, entry.directory))

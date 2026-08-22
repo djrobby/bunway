@@ -121,6 +121,11 @@ update routes explicitly refresh `updatedAt`. `--no-timestamps` opts out without
 
 Docusaurus documentation is part of Bunway's public interface. Generator, CLI, configuration, and
 runtime changes update the relevant guide and preserve a successful documentation build.
+The npm package release does not rebuild the independent static site: the GitHub Pages workflow builds
+and deploys documentation on pushes to `master`. This keeps npm publication bounded to package
+verification while retaining one authoritative Pages build path. Webpack's filesystem cache is disabled
+for Docusaurus because its V8 serialization is incompatible with Bun; documentation commands still run
+under Bun.
 
 ## PostgreSQL runtime and migration clients stay separate
 

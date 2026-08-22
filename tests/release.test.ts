@@ -11,6 +11,15 @@ test('release tests exclude the database-backed package smoke fixture', async ()
   expect(release).toContain("await run(['bun', 'run', 'test'])")
 })
 
+test('npm release leaves the independent GitHub Pages build to its workflow', async () => {
+  const release = await Bun.file(join(root, 'scripts/release.ts')).text()
+  const pages = await Bun.file(join(root, '.github/workflows/pages.yml')).text()
+
+  expect(release).not.toContain("await run(['bun', 'run', 'docs:build'])")
+  expect(release).toContain('Documentation is verified and deployed by the GitHub Pages workflow.')
+  expect(pages).toContain('run: bun run docs:build')
+})
+
 test('release preflight packs unpublished workspace dependencies without resolving npm', async () => {
   const release = await Bun.file(join(root, 'scripts/release.ts')).text()
 
