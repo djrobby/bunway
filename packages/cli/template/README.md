@@ -8,7 +8,7 @@ TypeScript 7 native checker through `svelte-check --tsgo`.
 
 PostgreSQL applications use Bun.SQL at runtime and include `pg` only for Drizzle Kit's migration
 connection.
-`pg` is the default; create with `--postgres-driver=postgres` to use Postgres.js for migrations instead.
+PostgreSQL migrations are generated with Drizzle Kit and applied through Drizzle ORM with Bun.SQL.
 
 Realtime channels use `channel()` and the included `realtimeRoutes`. Generate a recipe with
 `bunway g realtime status Order` or `bunway g realtime chat Room`.

@@ -38,9 +38,6 @@ async function main() {
         .find((value) => value.startsWith("--database="))
         ?.slice(11) as
         "postgres" | "mysql" | "sqlite" | "pocketbase" | undefined,
-      postgresDriver: args
-        .find((value) => value.startsWith("--postgres-driver="))
-        ?.slice(18) as "pg" | "postgres" | undefined,
     });
   if (command === "dev") return dev();
   if (command === "routes") return routes();
@@ -55,9 +52,6 @@ async function main() {
       args.find((value) => value.startsWith("--adapter="))?.slice(10) as
         "postgres" | "mysql" | "sqlite" | "pocketbase" | undefined,
       process.cwd(),
-      args
-        .find((value) => value.startsWith("--postgres-driver="))
-        ?.slice(18) as "pg" | "postgres" | undefined,
     );
   if (command === "db:list") return listDatabases();
   if (command === "worker") return worker();
@@ -299,7 +293,7 @@ async function help() {
   console.log(`Bunway ${await cliVersion()}
 
   bunway --version | bunway -v
-  bunway new <name> [--api-only] [--database=postgres|mysql|sqlite|pocketbase] [--postgres-driver=pg|postgres]
+  bunway new <name> [--api-only] [--database=postgres|mysql|sqlite|pocketbase]
   bunway dev
   bunway g model <Name> [field:type...]
   bunway g resource <Name> [field:type...]
@@ -315,7 +309,7 @@ async function help() {
   bunway g auth [--password] [--magic-link] [--passkeys] [--oauth=google,github,microsoft,apple]
                 [--mfa=totp,backup-codes,email-otp,trusted-devices] [--bearer] [--api-key] [--database=<name>]
   bunway g realtime <notifications|status|progress|stream|dashboard|chat|presence|custom> [Name] [--transport=sse|websocket]
-  bunway db:add <name> --adapter=postgres|mysql|sqlite|pocketbase [--postgres-driver=pg|postgres]
+  bunway db:add <name> --adapter=postgres|mysql|sqlite|pocketbase
   bunway db:list
   bunway db:migrate [--database=<name>|--all]
   bunway routes

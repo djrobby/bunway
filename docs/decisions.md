@@ -8,6 +8,10 @@ consequences. Proposed work belongs in the Roadmap, not here.
 
 All package installation, scripts, tests, package executables, and process orchestration use Bun. Generated applications do not require npm, pnpm, or yarn.
 
+Drizzle Kit generates PostgreSQL migration files, while Drizzle ORM's Bun.SQL migrator applies them.
+Stable Drizzle Kit 0.31 hides database exceptions behind its migration spinner; the Bun.SQL path keeps
+failures actionable and removes the otherwise-stale `pg`/Postgres.js tooling dependency.
+
 ## Explicit generated registration
 
 Generators update small schema, route, and job index files. This keeps registrations visible and avoids filesystem discovery or runtime reflection.
@@ -134,16 +138,12 @@ verification while retaining one authoritative Pages build path. Webpack's files
 for Docusaurus because its V8 serialization is incompatible with Bun; documentation commands still run
 under Bun.
 
-## PostgreSQL runtime and migration clients stay separate
+## PostgreSQL runtime and migrations use Bun.SQL
 
-Generated PostgreSQL applications use Bun.SQL through Drizzle at runtime. Stable Drizzle Kit still
-requires its supported `pg` client package when applying migrations, so PostgreSQL applications carry
-`pg` as a development dependency only. Drizzle Kit and that client execute under Bun; Node.js is not a
-runtime requirement. Bunway does not import `pg` in generated application code, and non-PostgreSQL
-applications do not receive it unless they add a named PostgreSQL database.
-`pg` is the migration-client default; `--postgres-driver=postgres` selects Postgres.js without changing
-the runtime connection. Migration preflight verifies the selected package is physically installed and
-repairs stale installs with `bun install` before invoking Drizzle Kit.
+Generated PostgreSQL applications use Bun.SQL through Drizzle both at runtime and when applying
+migrations. Drizzle Kit remains the SQL generator, but Bunway does not invoke its stable migration
+spinner because that path hides database exceptions. PostgreSQL applications therefore require no
+`pg` or Postgres.js tooling dependency.
 
 ## UUID primary keys with Drizzle as relationship source of truth
 

@@ -1429,3 +1429,10 @@ If no, do not add it.
 When uncertain:
 
 **choose less framework.**
+
+---
+
+## Change Handoff
+
+After completing any code or documentation change, include a short, single-line Git commit message in
+the final response.

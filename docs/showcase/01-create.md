@@ -17,7 +17,6 @@ On PowerShell, use `Copy-Item .env.example .env` instead of `cp` if `cp` is not 
 Postgres.js for migration tooling instead, create with:
 
 ```sh
-bun create bunway showcase --postgres-driver=postgres
 ```
 
 Application queries use Bun.SQL in either case.

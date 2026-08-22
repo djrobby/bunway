@@ -34,19 +34,20 @@
     },
     "packages/cli": {
       "name": "@bunway/cli",
-      "version": "0.1.0-preview.1",
+      "version": "0.1.0-preview.5",
       "bin": {
         "bunway": "./src/bin.ts",
       },
       "dependencies": {
         "@bunway/core": "workspace:*",
+        "drizzle-orm": "0.45.2",
         "prettier": "3.9.6",
         "prettier-plugin-svelte": "4.1.1",
       },
     },
     "packages/core": {
       "name": "@bunway/core",
-      "version": "0.1.0-preview.1",
+      "version": "0.1.0-preview.5",
       "dependencies": {
         "drizzle-orm": "^0.45.2",
         "elysia": "^1.4.29",
@@ -58,7 +59,7 @@
     },
     "packages/create-bunway": {
       "name": "create-bunway",
-      "version": "0.1.0-preview.1",
+      "version": "0.1.0-preview.5",
       "bin": {
         "create-bunway": "./src/bin.ts",
       },

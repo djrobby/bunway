@@ -19,7 +19,6 @@ bunway dev
 PostgreSQL is the default. Other supported starters are available explicitly:
 
 ```sh
-bun create bunway shop --postgres-driver=postgres
 ```
 
 `pg` is the default Drizzle Kit migration client; the option above selects Postgres.js. Application

@@ -2,10 +2,10 @@ import { basename, join, resolve } from 'node:path'
 import { cp, rename, rm } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { CliError, run } from './utils'
-import { configurePrimary, type PostgresDriver } from './databases'
+import { configurePrimary } from './databases'
 import type { DatabaseAdapter } from '@bunway/core'
 
-export async function createProject(name?: string, options: { install?: boolean; apiOnly?: boolean; database?: DatabaseAdapter; postgresDriver?: PostgresDriver } = {}) {
+export async function createProject(name?: string, options: { install?: boolean; apiOnly?: boolean; database?: DatabaseAdapter } = {}) {
   if (!name) throw new CliError('Provide an application name: bun create bunway myapp')
   const target = resolve(name)
   const appName = basename(target)
@@ -19,8 +19,6 @@ export async function createProject(name?: string, options: { install?: boolean;
   manifest.name = appName.toLowerCase()
   const adapter = options.database ?? 'postgres'
   if (!['postgres', 'mysql', 'sqlite', 'pocketbase'].includes(adapter)) throw new CliError('Database must be postgres, mysql, sqlite, or pocketbase')
-  if (options.postgresDriver && !['pg', 'postgres'].includes(options.postgresDriver)) throw new CliError('PostgreSQL driver must be pg or postgres')
-  if (options.postgresDriver && adapter !== 'postgres') throw new CliError('--postgres-driver is only valid with PostgreSQL')
   if (options.apiOnly) {
     await rm(join(target, 'web'), { recursive: true, force: true })
     delete manifest.workspaces
@@ -29,7 +27,7 @@ export async function createProject(name?: string, options: { install?: boolean;
     await Bun.write(join(target, '.bunway-api-only'), 'API-only Bunway application\n')
   }
   await Bun.write(packagePath, `${JSON.stringify(manifest, null, 2)}\n`)
-  await configurePrimary(adapter, target, options.postgresDriver)
+  await configurePrimary(adapter, target)
   if (adapter === 'sqlite') {
     const envPath = join(target, '.env.example')
     await Bun.write(envPath, (await Bun.file(envPath).text()).replace(/^DATABASE_URL=.*\r?\n/m, 'DATABASE_URL=./storage/development.sqlite\n'))

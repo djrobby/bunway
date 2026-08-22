@@ -4,8 +4,6 @@ import type { DatabaseAdapter, DatabaseConnection } from '@bunway/core'
 import { CliError, insertBefore, run } from './utils'
 
 export type DatabaseName = string
-export type PostgresDriver = 'pg' | 'postgres'
-
 export async function databaseConfig(cwd = process.cwd()) {
   const path = join(cwd, 'src', 'db', 'config.ts')
   if (!await Bun.file(path).exists()) return { primary: { adapter: 'postgres', url: Bun.env.DATABASE_URL } } as Record<string, DatabaseConnection>
@@ -29,7 +27,7 @@ export const databaseDirectory = (name: string) => name === 'primary' ? join('sr
 export const databaseEnv = (name: string) => name === 'primary' ? 'DATABASE_URL' : `${name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase()}_DATABASE_URL`
 export const drizzleConfig = (name: string) => name === 'primary' ? 'drizzle.config.ts' : `drizzle.${name}.config.ts`
 
-export async function addDatabase(name: string | undefined, adapter: DatabaseAdapter | undefined, cwd = process.cwd(), postgresDriver?: PostgresDriver) {
+export async function addDatabase(name: string | undefined, adapter: DatabaseAdapter | undefined, cwd = process.cwd()) {
   if (!name || !/^[a-z][a-zA-Z0-9]*$/.test(name) || name === 'db') throw new CliError('Database names must start with a lowercase letter and contain only letters and numbers')
   if (name === 'primary') throw new CliError('The primary database already exists')
   if (!adapter || !['postgres', 'mysql', 'sqlite', 'pocketbase'].includes(adapter)) throw new CliError('Adapter must be postgres, mysql, sqlite, or pocketbase')
@@ -61,7 +59,6 @@ export async function addDatabase(name: string | undefined, adapter: DatabaseAda
     const envPath = join(cwd, '.env.example')
     await Bun.write(envPath, `${(await Bun.file(envPath).text()).trimEnd()}\n${env}=\n`)
   }
-  if (adapter === 'postgres') await ensurePostgresDependency(cwd, postgresDriver)
   if (adapter === 'mysql') await ensureMysqlDependency(cwd)
   if (adapter === 'pocketbase') await ensurePocketBaseDependency(cwd)
   console.log(`Added ${name} (${adapterLabel(adapter)})`)
@@ -83,8 +80,37 @@ export async function migrateDatabases(name: string | undefined, all: boolean, c
     await ensureDatabaseDriver(databases[current]!.adapter, cwd)
     const config = drizzleConfig(current)
     await run(['bunx', '--bun', 'drizzle-kit', 'generate', `--config=${config}`], cwd)
-    await run(['bunx', '--bun', 'drizzle-kit', 'migrate', `--config=${config}`], cwd)
+    if (databases[current]!.adapter === 'postgres') await migratePostgres(current, cwd)
+    else await run(['bunx', '--bun', 'drizzle-kit', 'migrate', `--config=${config}`], cwd)
   }
+}
+
+async function migratePostgres(name: string, cwd: string) {
+  const env = databaseEnv(name)
+  const url = Bun.env[env]
+  if (!url) throw new CliError(`${env} is required`)
+  const { drizzle } = await import('drizzle-orm/bun-sql')
+  const { migrate } = await import('drizzle-orm/bun-sql/migrator')
+  const client = new Bun.SQL(url)
+  try {
+    await migrate(drizzle(client), { migrationsFolder: join(cwd, databaseDirectory(name), 'migrations') })
+    console.log('Migrations applied successfully')
+  } catch (error) {
+    throw new CliError(migrationError(error))
+  } finally {
+    await client.close()
+  }
+}
+
+export function migrationError(error: unknown) {
+  if (!(error instanceof Error)) return `Migration failed: ${String(error)}`
+  const databaseError = error as Error & { code?: string; detail?: string; hint?: string }
+  const context = [
+    databaseError.code && `PostgreSQL ${databaseError.code}`,
+    databaseError.detail,
+    databaseError.hint && `Hint: ${databaseError.hint}`,
+  ].filter(Boolean).join('\n')
+  return `Migration failed: ${databaseError.message}${context ? `\n${context}` : ''}`
 }
 
 export function connectionSource(name: string, adapter: DatabaseAdapter, url: string) {
@@ -102,7 +128,7 @@ export function drizzleConfigSource(name: string, adapter: DatabaseAdapter, url:
   return `import { defineConfig } from 'drizzle-kit'\n\nexport default defineConfig({\n  dialect: '${dialect}',\n  schema: './${directory}/schema/index.ts',\n  out: './${directory}/migrations',\n  dbCredentials: { url: ${url} },\n})\n`
 }
 
-export async function configurePrimary(adapter: DatabaseAdapter, cwd: string, postgresDriver?: PostgresDriver) {
+export async function configurePrimary(adapter: DatabaseAdapter, cwd: string) {
   const url = adapter === 'sqlite' ? `'./storage/development.sqlite'` : `required('DATABASE_URL', Bun.env.DATABASE_URL)`
   const imports = adapter === 'postgres'
     ? "import { drizzle as postgresDrizzle } from 'drizzle-orm/bun-sql'"
@@ -118,17 +144,8 @@ export async function configurePrimary(adapter: DatabaseAdapter, cwd: string, po
   if (adapter !== 'pocketbase') await Bun.write(join(cwd, 'drizzle.config.ts'), drizzleConfigSource('primary', adapter, adapter === 'sqlite' ? "'./storage/development.sqlite'" : 'process.env.DATABASE_URL!'))
   else await rm(join(cwd, 'drizzle.config.ts'), { force: true })
   await rm(join(cwd, 'src', 'db', 'migrate.ts'), { force: true })
-  if (adapter === 'postgres') await ensurePostgresDependency(cwd, postgresDriver)
   if (adapter === 'mysql') await ensureMysqlDependency(cwd)
   if (adapter === 'pocketbase') await ensurePocketBaseDependency(cwd)
-}
-
-async function ensurePostgresDependency(cwd: string, requested?: PostgresDriver) {
-  const path = join(cwd, 'package.json')
-  const manifest = await Bun.file(path).json()
-  const selected = requested ?? postgresDriverFromManifest(manifest)
-  manifest.devDependencies[selected] = manifest.devDependencies[selected] ?? 'latest'
-  await Bun.write(path, `${JSON.stringify(manifest, null, 2)}\n`)
 }
 
 async function ensureMysqlDependency(cwd: string) {
@@ -145,15 +162,12 @@ async function ensurePocketBaseDependency(cwd: string) {
   await Bun.write(path, `${JSON.stringify(manifest, null, 2)}\n`)
 }
 
-export async function ensureDatabaseDriver(adapter: DatabaseAdapter, cwd: string, requestedPostgresDriver?: PostgresDriver) {
-  if (adapter === 'postgres') await ensurePostgresDependency(cwd, requestedPostgresDriver)
+export async function ensureDatabaseDriver(adapter: DatabaseAdapter, cwd: string) {
   if (adapter === 'mysql') await ensureMysqlDependency(cwd)
   if (adapter === 'pocketbase') await ensurePocketBaseDependency(cwd)
 
   const manifest = await Bun.file(join(cwd, 'package.json')).json()
-  const packageName = adapter === 'postgres'
-    ? requestedPostgresDriver ?? postgresDriverFromManifest(manifest)
-    : adapter === 'mysql'
+  const packageName = adapter === 'mysql'
       ? 'mysql2'
       : adapter === 'pocketbase'
         ? 'pocketbase'
@@ -171,11 +185,6 @@ export async function ensureDatabaseDriver(adapter: DatabaseAdapter, cwd: string
       `${packageName} is declared but was not installed. Run "bun install" in the application and retry.`,
     )
   }
-}
-
-function postgresDriverFromManifest(manifest: Record<string, any>): PostgresDriver {
-  if (manifest.devDependencies?.postgres || manifest.dependencies?.postgres) return 'postgres'
-  return 'pg'
 }
 
 const adapterLabel = (adapter: DatabaseAdapter) => ({ postgres: 'PostgreSQL', mysql: 'MySQL', sqlite: 'SQLite', pocketbase: 'PocketBase' })[adapter]

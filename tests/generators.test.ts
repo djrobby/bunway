@@ -18,7 +18,7 @@ import { consoleCommand } from "../packages/cli/src/console";
 import {
   addDatabase,
   databaseConfig,
-  ensureDatabaseDriver,
+  migrationError,
 } from "../packages/cli/src/databases";
 import { generateAuth, normalizeAuthOptions } from "../packages/cli/src/auth";
 import { generateAudit } from "../packages/cli/src/audit";
@@ -32,6 +32,16 @@ async function app() {
 }
 
 describe("critical generation flow", () => {
+  test("reports the PostgreSQL error hidden by stable Drizzle Kit migrate", () => {
+    const error = Object.assign(new Error('relation "products" already exists'), {
+      code: "42P07",
+      detail: "A relation with that name already exists.",
+      hint: "Reconcile the database migration history.",
+    });
+    expect(migrationError(error)).toContain('Migration failed: relation "products" already exists');
+    expect(migrationError(error)).toContain("PostgreSQL 42P07");
+    expect(migrationError(error)).toContain("A relation with that name already exists.");
+  });
   test("reports the installed CLI package version", async () => {
     const manifest = await Bun.file(
       join(import.meta.dir, "../packages/cli/package.json"),
@@ -107,7 +117,7 @@ describe("critical generation flow", () => {
     expect(sidebar).toContain("group-data-[collapsible=icon]:hidden");
     const manifest = await Bun.file(join(path, "package.json")).json();
     const webManifest = await Bun.file(join(path, "web", "package.json")).json();
-    expect(manifest.devDependencies.pg).toBe("latest");
+    expect(manifest.devDependencies.pg).toBeUndefined();
     expect(webManifest.scripts.dev).toBe("bun --bun vite");
     expect(
       await Bun.file(
@@ -117,27 +127,6 @@ describe("critical generation flow", () => {
         ),
       ).text(),
     ).toContain("data-[active=true]:bg-sidebar-accent");
-  });
-
-  test("installs the PostgreSQL migration driver when the application is missing it", async () => {
-    const root = await mkdtemp(join(tmpdir(), "bunway-postgres-install-"));
-    const path = join(root, "app");
-    await createProject(path, { install: false, apiOnly: true });
-    expect(await Bun.file(join(path, "node_modules/pg/package.json")).exists()).toBe(false);
-
-    await ensureDatabaseDriver("postgres", path);
-
-    expect(await Bun.file(join(path, "node_modules/pg/package.json")).exists()).toBe(true);
-  }, 30_000);
-
-  test("allows postgres.js as the explicit migration driver while defaulting to pg", async () => {
-    const root = await mkdtemp(join(tmpdir(), "bunway-postgres-driver-"));
-    const path = join(root, "app");
-    await createProject(path, { install: false, postgresDriver: "postgres" });
-    const manifest = await Bun.file(join(path, "package.json")).json();
-
-    expect(manifest.devDependencies.postgres).toBe("latest");
-    expect(manifest.devDependencies.pg).toBeUndefined();
   });
 
   test("creates an API-only application without a web workspace", async () => {
@@ -211,7 +200,7 @@ describe("critical generation flow", () => {
     expect(index).toContain("export const content = new PocketBase");
   });
 
-  test("adds the Drizzle Kit PostgreSQL driver to a non-PostgreSQL application", async () => {
+  test("adds a Bun.SQL PostgreSQL database without a client package", async () => {
     const root = await mkdtemp(join(tmpdir(), "bunway-sqlite-postgres-"));
     const path = join(root, "app");
     await createProject(path, { install: false, database: "sqlite" });
@@ -219,7 +208,7 @@ describe("critical generation flow", () => {
     await addDatabase("queue", "postgres", path);
 
     const manifest = await Bun.file(join(path, "package.json")).json();
-    expect(manifest.devDependencies.pg).toBe("latest");
+    expect(manifest.devDependencies.pg).toBeUndefined();
   });
 
   test("generates Better Auth directly with database, Elysia, and Svelte integration", async () => {

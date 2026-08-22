@@ -7,15 +7,10 @@ title: PostgreSQL adapter
 PostgreSQL is Bunway's default and uses Drizzle's `bun-sql` driver over Bun.SQL. `DATABASE_URL` configures
 primary; named connections conventionally use `<NAME>_DATABASE_URL`.
 
-Generated PostgreSQL applications also include `pg` as a development dependency. Application queries
-still use Bun.SQL; `pg` exists because the current stable Drizzle Kit migration command requires one of
-its supported PostgreSQL connection drivers when it applies generated SQL.
-
-`pg` is the default migration client. Select Postgres.js at creation time with
-`bun create bunway app --postgres-driver=postgres`. The selection affects Drizzle Kit only; application
-queries continue to use Bun.SQL. Before migrating, Bunway verifies that the selected package is present,
-runs `bun install` when it is missing, and fails with an actionable message if installation did not
-succeed.
+Drizzle Kit generates the SQL migration files. Bunway applies PostgreSQL migrations through Drizzle
+ORM's Bun.SQL migrator, which keeps the operation Bun-native and reports the underlying database error.
+No `pg` or Postgres.js package is required. Existing applications that added `pg` only for Bunway
+migrations may remove it with `bun remove pg` after upgrading the CLI.
 
 Generated UUID IDs use Drizzle's application default with Bun's native `Bun.randomUUIDv7()`. PostgreSQL
 stores the result in its ordinary `uuid` type, so UUIDv7 does not impose a PostgreSQL 18 requirement.
