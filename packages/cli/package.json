@@ -1,6 +1,6 @@
 {
   "name": "@bunway/cli",
-  "version": "0.1.0-preview.6",
+  "version": "0.1.0-preview.7",
   "description": "Rails-inspired Bunway CLI for creating, generating, migrating, and running Bun, Elysia, Drizzle, and SvelteKit applications.",
   "keywords": [
     "bun",

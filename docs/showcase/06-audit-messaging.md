@@ -5,6 +5,8 @@ title: 6. Build Audit and Messaging demos
 # 6. Build Audit and Messaging demos
 
 This step generates Audit, Mail, and SMS, then builds the same two operational pages as the test app.
+`bun create bunway showcase` creates the starter, not a pre-seeded finished demo; completing this step
+is what adds the visible **Audit Showcase** and **Messaging Showcase** sidebar pages.
 
 ## 1. Generate the capabilities
 
@@ -46,7 +48,11 @@ const body = t.Object({
 })
 
 async function recent() {
-  return db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt)).limit(50)
+  return db
+    .select()
+    .from(auditLogs)
+    .orderBy(desc(auditLogs.createdAt))
+    .limit(50)
 }
 
 export const auditShowcaseRoutes = new Elysia({ prefix: '/examples/audit' })
@@ -238,10 +244,16 @@ async function recent() {
   return db
     .select()
     .from(auditLogs)
-    .where(inArray(auditLogs.event, [
-      'mail.logged', 'mail.sent', 'mail.failed',
-      'sms.logged', 'sms.sent', 'sms.failed',
-    ]))
+    .where(
+      inArray(auditLogs.event, [
+        'mail.logged',
+        'mail.sent',
+        'mail.failed',
+        'sms.logged',
+        'sms.sent',
+        'sms.failed',
+      ]),
+    )
     .orderBy(desc(auditLogs.createdAt))
     .limit(20)
 }
@@ -250,39 +262,53 @@ function runShowcaseWorker() {
   setTimeout(() => void workOnce({ queues: ['messaging'] }), 250)
 }
 
-export const messagingShowcaseRoutes = new Elysia({ prefix: '/examples/messaging' })
+export const messagingShowcaseRoutes = new Elysia({
+  prefix: '/examples/messaging',
+})
   .get('/audit', recent)
-  .post('/mail', async ({ body }) => {
-    if (!body.later) return { delivery: await mail.send(body) }
-    const id = await mail.sendLater(body, { queue: 'messaging' })
-    runShowcaseWorker()
-    return { jobId: String(id) }
-  }, { body: mailBody })
-  .post('/sms', async ({ body }) => {
-    if (!body.later) return { delivery: await sms.send(body) }
-    const id = await sms.sendLater(body, { queue: 'messaging' })
-    runShowcaseWorker()
-    return { jobId: String(id) }
-  }, { body: smsBody })
+  .post(
+    '/mail',
+    async ({ body }) => {
+      if (!body.later) return { delivery: await mail.send(body) }
+      const id = await mail.sendLater(body, { queue: 'messaging' })
+      runShowcaseWorker()
+      return { jobId: String(id) }
+    },
+    { body: mailBody },
+  )
+  .post(
+    '/sms',
+    async ({ body }) => {
+      if (!body.later) return { delivery: await sms.send(body) }
+      const id = await sms.sendLater(body, { queue: 'messaging' })
+      runShowcaseWorker()
+      return { jobId: String(id) }
+    },
+    { body: smsBody },
+  )
   .post('/order-mailer', async () => {
-    const id = await orderMailer.confirmation({
-      to: 'demo@bunway.test',
-      reference: 'DEMO-1001',
-    }).sendLater({
-      queue: 'messaging',
-      audit: { subject: { type: 'order', id: 'DEMO-1001' } },
-    })
+    const id = await orderMailer
+      .confirmation({
+        to: 'demo@bunway.test',
+        reference: 'DEMO-1001',
+      })
+      .sendLater({
+        queue: 'messaging',
+        audit: { subject: { type: 'order', id: 'DEMO-1001' } },
+      })
     runShowcaseWorker()
     return { jobId: String(id) }
   })
   .post('/order-sms', async () => {
-    const id = await orderSms.shipped({
-      to: '+15555550100',
-      reference: 'DEMO-1001',
-    }).sendLater({
-      queue: 'messaging',
-      audit: { subject: { type: 'order', id: 'DEMO-1001' } },
-    })
+    const id = await orderSms
+      .shipped({
+        to: '+15555550100',
+        reference: 'DEMO-1001',
+      })
+      .sendLater({
+        queue: 'messaging',
+        audit: { subject: { type: 'order', id: 'DEMO-1001' } },
+      })
     runShowcaseWorker()
     return { jobId: String(id) }
   })
@@ -427,6 +453,15 @@ In `web/src/lib/resources.ts`, before `// bunway:resources`, add:
 Restart `bunway dev`. Open both sidebar links. Record an Audit event, use the redaction example, send
 Mail/SMS now, then send them later. Development delivery prints message content to the API console;
 Audit stores delivery outcomes but never bodies or authentication secrets.
+
+Seed and verify both operational demos without the UI (use `curl.exe` in PowerShell):
+
+```sh
+curl -X POST http://localhost:3000/examples/audit -H "content-type: application/json" -d '{"event":"order.approved","actor":{"type":"demo","id":"curl"},"subject":{"type":"order","id":"DEMO-1001"},"metadata":{"source":"showcase tutorial"}}'
+curl -X POST http://localhost:3000/examples/messaging/mail -H "content-type: application/json" -d '{"to":"demo@bunway.test","subject":"Bunway Mail","text":"Hello from the Showcase"}'
+curl -X POST http://localhost:3000/examples/messaging/sms -H "content-type: application/json" -d '{"to":"+15555550100","text":"Hello from Bunway SMS"}'
+curl http://localhost:3000/examples/messaging/audit
+```
 
 PostgreSQL users can also exercise the **send later** buttons with `bunway worker`. On MySQL and SQLite,
 use **send now** only: immediate Mail/SMS and Audit work on those adapters, while queued delivery uses

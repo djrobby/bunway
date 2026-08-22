@@ -5,7 +5,9 @@ const root = join(import.meta.dir, '..')
 
 test('documentation targets the Bunway GitHub Pages project site', async () => {
   const config = await Bun.file(join(root, 'docusaurus.config.ts')).text()
-  const workflow = await Bun.file(join(root, '.github/workflows/pages.yml')).text()
+  const workflow = await Bun.file(
+    join(root, '.github/workflows/pages.yml'),
+  ).text()
 
   expect(config).toContain("url: 'https://djrobby.github.io'")
   expect(config).toContain("baseUrl: '/bunway/'")
@@ -18,10 +20,14 @@ test('documentation targets the Bunway GitHub Pages project site', async () => {
 
 test('request lifecycle sits between first app and project structure and covers the full path', async () => {
   const sidebar = await Bun.file(join(root, 'sidebars.ts')).text()
-  const lifecycle = await Bun.file(join(root, 'docs/request-lifecycle.md')).text()
+  const lifecycle = await Bun.file(
+    join(root, 'docs/request-lifecycle.md'),
+  ).text()
   const firstApp = await Bun.file(join(root, 'docs/first-app.md')).text()
 
-  expect(sidebar).toContain('"first-app", "request-lifecycle", "project-structure"')
+  expect(sidebar).toContain(
+    '"first-app", "request-lifecycle", "project-structure"',
+  )
   for (const concept of [
     'SvelteKit/Vite :5173',
     'Elysia/Bun :3000',
@@ -33,7 +39,8 @@ test('request lifecycle sits between first app and project structure and covers 
     'Jobs',
     'Realtime',
     'Where to debug each failure',
-  ]) expect(lifecycle).toContain(concept)
+  ])
+    expect(lifecycle).toContain(concept)
   expect(firstApp).toContain('./request-lifecycle.md')
 })
 
@@ -50,7 +57,9 @@ test('showcase guide stays aligned with the maintained test application', async 
   ]
   const showcase = (
     await Promise.all(
-      showcaseFiles.map((file) => Bun.file(join(root, 'docs/showcase', file)).text()),
+      showcaseFiles.map((file) =>
+        Bun.file(join(root, 'docs/showcase', file)).text(),
+      ),
     )
   ).join('\n')
   const testAppNavigation = await Bun.file(
@@ -78,7 +87,9 @@ test('showcase guide stays aligned with the maintained test application', async 
     expect(showcase).toContain(destination)
     expect(testAppNavigation).toContain(destination)
   }
-  expect(showcase).toContain("{ label: 'Realtime Showcase', href: '/realtime', icon: 'chat' }")
+  expect(showcase).toContain(
+    "{ label: 'Realtime Showcase', href: '/realtime', icon: 'chat' }",
+  )
   expect(showcase).toContain('Jobs and Realtime do not imply a UI')
   for (const completeFile of [
     'src/routes/blog.ts',
@@ -97,11 +108,34 @@ test('showcase guide stays aligned with the maintained test application', async 
     expect(showcase).toContain(`\`${completeFile}\``)
   }
   expect(showcase).toContain("import { blogRoutes } from './blog'")
-  expect(showcase).toContain("import { postTaggings } from '../db/schema/post-taggings'")
+  expect(showcase).toContain(
+    "import { postTaggings } from '../db/schema/post-taggings'",
+  )
   expect(showcase).toContain("export { postTaggings } from './post-taggings'")
   expect(showcase).toContain('Do not substitute `postsToTags`')
-  expect(showcase).not.toContain("$lib/date-time.svelte.js")
-  expect(showcase).toContain("import { realtimeShowcaseRoutes } from './realtime'")
+  expect(showcase).not.toContain('$lib/date-time.svelte.js')
+  expect(showcase).toContain(
+    "import { realtimeShowcaseRoutes } from './realtime'",
+  )
   expect(showcase).toContain("import { auditShowcaseRoutes } from './audit'")
-  expect(showcase).toContain("import { messagingShowcaseRoutes } from './messaging'")
+  expect(showcase).toContain(
+    "import { messagingShowcaseRoutes } from './messaging'",
+  )
+  for (const endpoint of [
+    'POST http://localhost:3000/categories',
+    'POST http://localhost:3000/products',
+    'POST http://localhost:3000/users',
+    'POST http://localhost:3000/tags',
+    'POST http://localhost:3000/posts',
+    'POST http://localhost:3000/comments',
+    'POST http://localhost:3000/api/auth/sign-up/email',
+    'POST http://localhost:3000/examples/audit',
+    'POST http://localhost:3000/examples/messaging/mail',
+    'POST http://localhost:3000/examples/messaging/sms',
+  ])
+    expect(showcase).toContain(endpoint)
+  expect(showcase).toContain('Parent comment (optional)')
+  expect(showcase).toContain(
+    'onreply={(parentId, body) => reply(post.id, parentId, body)}',
+  )
 })

@@ -1,9 +1,10 @@
 import { join } from "node:path";
+import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { format } from "prettier";
 import * as sveltePlugin from "prettier-plugin-svelte";
 import { database, databaseDirectory } from "./databases";
-import { CliError, insertBefore } from "./utils";
+import { CliError, insertBefore, run } from "./utils";
 import { ensureMessaging } from "./messaging";
 
 export const authProviders = [
@@ -572,19 +573,16 @@ export async function generateAuth(raw: AuthOptions, cwd = process.cwd()) {
     }
     const sidebarPath = join(cwd, "web/src/lib/components/app-sidebar.svelte");
     let sidebar = await Bun.file(sidebarPath).text();
-    if (!sidebar.includes("from '$lib/auth-client'"))
-      sidebar = sidebar.replace(
-        "import { resources } from '$lib/resources'",
-        "import { resources } from '$lib/resources'\n  import { authClient } from '$lib/auth-client'",
-      );
-    if (!sidebar.includes("const authSession = authClient.useSession()"))
-      sidebar = sidebar.replace(
-        "function isActive(href: string)",
-        "const authSession = authClient.useSession()\n  function isActive(href: string)",
-      );
+    sidebar = sidebar
+      .replace(/\s*import \{ authClient \} from ['"]\$lib\/auth-client['"];?/, "")
+      .replace(/\s*const authSession = authClient\.useSession\(\);?/, "");
     sidebar = sidebar.replace(
       '<Sidebar.Footer><p class="px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">Generated with Bunway</p></Sidebar.Footer>',
-      `<Sidebar.Footer><Sidebar.Menu><Sidebar.MenuItem><Sidebar.MenuButton tooltipContent={$authSession.data ? 'Account' : 'Sign in'} isActive={isActive($authSession.data ? '/account' : '/login')}>{#snippet child({ props })}<a href={$authSession.data ? '/account' : '/login'} {...props}><RiUser3Line /><span class="group-data-[collapsible=icon]:hidden">{$authSession.data ? $authSession.data.user.name : 'Sign in'}</span></a>{/snippet}</Sidebar.MenuButton></Sidebar.MenuItem></Sidebar.Menu><p class="px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">Generated with Bunway</p></Sidebar.Footer>`,
+      `<Sidebar.Footer><Sidebar.Menu><Sidebar.MenuItem><Sidebar.MenuButton tooltipContent="Account" isActive={isActive('/account')}>{#snippet child({ props })}<a href="/account" {...props}><RiUser3Line /><span class="group-data-[collapsible=icon]:hidden">Account</span></a>{/snippet}</Sidebar.MenuButton></Sidebar.MenuItem></Sidebar.Menu><p class="px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">Generated with Bunway</p></Sidebar.Footer>`,
+    );
+    sidebar = sidebar.replace(
+      /<Sidebar\.Footer><Sidebar\.Menu><Sidebar\.MenuItem><Sidebar\.MenuButton tooltipContent=\{\$authSession[\s\S]*?<\/Sidebar\.Footer>/,
+      `<Sidebar.Footer><Sidebar.Menu><Sidebar.MenuItem><Sidebar.MenuButton tooltipContent="Account" isActive={isActive('/account')}>{#snippet child({ props })}<a href="/account" {...props}><RiUser3Line /><span class="group-data-[collapsible=icon]:hidden">Account</span></a>{/snippet}</Sidebar.MenuButton></Sidebar.MenuItem></Sidebar.Menu><p class="px-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">Generated with Bunway</p></Sidebar.Footer>`,
     );
     await Bun.write(
       sidebarPath,
@@ -597,7 +595,9 @@ export async function generateAuth(raw: AuthOptions, cwd = process.cwd()) {
       }),
     );
   }
+  const installed = existsSync(join(cwd, "node_modules"));
+  if (installed) await run(["bun", "install"], cwd);
   console.log(
-    `\nAuthentication generated for database "${options.database}". Run bun install, set BETTER_AUTH_SECRET, then run bunway db:migrate.`,
+    `\nAuthentication generated for database "${options.database}". ${installed ? "Dependencies installed." : "Run bun install."} Set BETTER_AUTH_SECRET, then run bunway db:migrate.`,
   );
 }

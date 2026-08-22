@@ -99,6 +99,51 @@ Apply it:
 bunway db:migrate
 ```
 
+The schema edit must also cross the API and UI boundaries. In `src/routes/comments.ts`, add this to
+the generated request body after `userId`:
+
+```ts
+parentId: t.Optional(t.String()),
+```
+
+In `web/src/routes/comments/+page.svelte`, add `parentId: ''` to both initial/reset form objects and
+`parentId: record.parentId ?? ''` to `edit`. Add this derived option list beside the User options:
+
+```ts
+let parentItems = $derived(
+  records
+    .filter((record) => record.id !== editing)
+    .map((record) => ({ id: record.id, label: record.body })),
+)
+```
+
+At the start of `save`, create `const values = { ...form, parentId: form.parentId || undefined }` and
+send `values` instead of `form`. Add this control after the User picker:
+
+```svelte
+<RelationshipCombobox
+  label="Parent comment (optional)"
+  items={parentItems}
+  bind:value={form.parentId}
+/>
+```
+
+The Comments CRUD can now create a root comment or select any existing Comment as its parent.
+
+## Seed the publishing tables
+
+Run these in order and replace each `PASTE_*_ID` with the `id` returned earlier. These commands seed
+every ordinary publishing table; the fifth command attaches the Tag through the polymorphic join:
+
+```sh
+curl -X POST http://localhost:3000/users -H "content-type: application/json" -d '{"name":"Ada Lovelace","email":"ada@example.test","bio":"Bunway author"}'
+curl -X POST http://localhost:3000/tags -H "content-type: application/json" -d '{"name":"Bun"}'
+curl -X POST http://localhost:3000/posts -H "content-type: application/json" -d '{"title":"Welcome to Bunway","slug":"welcome-to-bunway","excerpt":"A fast first post","body":"Built with Bun, Elysia, Drizzle, and SvelteKit.","userId":"PASTE_USER_ID","published":true,"publishedAt":"2026-08-21T12:00:00.000Z"}'
+curl -X POST http://localhost:3000/comments -H "content-type: application/json" -d '{"body":"This looks exciting.","postId":"PASTE_POST_ID","userId":"PASTE_USER_ID","approved":true}'
+curl -X PUT http://localhost:3000/posts/PASTE_POST_ID/tags -H "content-type: application/json" -d '{"ids":["PASTE_TAG_ID"]}'
+curl -X POST http://localhost:3000/comments -H "content-type: application/json" -d '{"body":"A nested reply from curl.","postId":"PASTE_POST_ID","userId":"PASTE_USER_ID","parentId":"PASTE_ROOT_COMMENT_ID","approved":true}'
+```
+
 ## 3. Create the Blog API
 
 Create `src/routes/blog.ts`:
@@ -152,7 +197,9 @@ export const blogRoutes = new Elysia({ prefix: '/blog' }).get('/', async () => {
 
   const covers = new Map(
     await Promise.all(
-      coverRows.map(async (row) => [row.postId, await storage.url(row.key)] as const),
+      coverRows.map(
+        async (row) => [row.postId, await storage.url(row.key)] as const,
+      ),
     ),
   )
 
@@ -205,7 +252,19 @@ Create `web/src/lib/components/comment-thread.svelte`:
     replies?: BlogComment[]
   }
 
-  let { comments }: { comments: BlogComment[] } = $props()
+  let { comments, onreply }: {
+    comments: BlogComment[]
+    onreply: (parentId: string, body: string) => Promise<void>
+  } = $props()
+  let replyingTo = $state<string | null>(null)
+  let reply = $state('')
+
+  async function submit(parentId: string) {
+    if (!reply.trim()) return
+    await onreply(parentId, reply.trim())
+    reply = ''
+    replyingTo = null
+  }
 </script>
 
 <div class="space-y-4">
@@ -216,9 +275,16 @@ Create `web/src/lib/components/comment-thread.svelte`:
         <time class="text-muted-foreground">{new Date(comment.createdAt).toLocaleString()}</time>
       </div>
       <p class="mt-2 leading-7 text-foreground/85">{comment.body}</p>
+      <button class="mt-3 text-sm font-medium text-primary" onclick={() => replyingTo = replyingTo === comment.id ? null : comment.id}>Reply</button>
+      {#if replyingTo === comment.id}
+        <form class="mt-3 flex gap-2" onsubmit={(event) => { event.preventDefault(); void submit(comment.id) }}>
+          <input class="min-w-0 flex-1 rounded-md border px-3 py-2" bind:value={reply} required />
+          <button class="rounded-md bg-primary px-3 py-2 text-primary-foreground">Post reply</button>
+        </form>
+      {/if}
       {#if comment.replies?.length}
         <div class="mt-4 border-l-2 border-primary/25 pl-4">
-          <CommentThread comments={comment.replies} />
+          <CommentThread comments={comment.replies} {onreply} />
         </div>
       {/if}
     </article>
@@ -250,6 +316,8 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
     comments: BlogComment[]
   }
   let posts = $state<BlogPost[]>([])
+  let users = $state<{ id: string; name: string }[]>([])
+  let userId = $state('')
   let message = $state('')
 
   function formatDate(value: string) {
@@ -273,10 +341,25 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
   }
 
   onMount(async () => {
-    const result = await api.blog.get()
+    const [result, userResult] = await Promise.all([
+      api.blog.get(),
+      api.users.get({ query: { perPage: 'all' } }),
+    ])
     if (result.error) message = 'Could not load the blog'
     else posts = (result.data ?? []) as BlogPost[]
+    if (!userResult.error) {
+      users = userResult.data?.records ?? []
+      userId ||= users[0]?.id ?? ''
+    }
   })
+
+  async function reply(postId: string, parentId: string, body: string) {
+    if (!userId) { message = 'Create or select a User before replying.'; return }
+    const result = await api.comments.post({ body, postId, userId, parentId, approved: true })
+    if (result.error) { message = 'Could not post the reply.'; return }
+    const refreshed = await api.blog.get()
+    if (!refreshed.error) posts = (refreshed.data ?? []) as BlogPost[]
+  }
 </script>
 
 <svelte:head><title>Bunway Blog Showcase</title></svelte:head>
@@ -310,8 +393,13 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
           <p class="mt-5 whitespace-pre-line leading-8">{post.body}</p>
           <section class="mt-10 border-t pt-8">
             <h3 class="mb-5 text-xl font-semibold">Discussion ({post.comments.length})</h3>
+            <label class="mb-5 block text-sm">Comment as
+              <select class="ml-2 rounded-md border px-3 py-2" bind:value={userId}>
+                {#each users as user}<option value={user.id}>{user.name}</option>{/each}
+              </select>
+            </label>
             {#if post.comments.length}
-              <CommentThread comments={thread(post.comments)} />
+              <CommentThread comments={thread(post.comments)} onreply={(parentId, body) => reply(post.id, parentId, body)} />
             {:else}
               <p class="text-muted-foreground">No comments yet.</p>
             {/if}

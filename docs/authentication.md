@@ -8,9 +8,13 @@ The recommended browser setup uses email/password, a database-backed session, an
 
 ```sh
 bunway g auth --password
-bun install
 bunway db:migrate
 ```
+
+The generator updates both package manifests and immediately runs `bun install` when the application
+already has `node_modules` (the normal `bun create bunway` workflow). In a source-only app it tells you
+to run `bun install` yourself. Auth imports stay on Auth-owned pages; the global sidebar contains only
+a plain `/account` link, so an Auth configuration error does not take down unrelated resource pages.
 
 Interactive `bunway g auth` asks about supported methods. Automation can combine flags:
 

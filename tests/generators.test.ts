@@ -34,15 +34,22 @@ async function app() {
 
 describe("critical generation flow", () => {
   test("reports the PostgreSQL error hidden by stable Drizzle Kit migrate", () => {
-    const cause = Object.assign(new Error('relation "products" already exists'), {
-      code: "42P07",
-      detail: "A relation with that name already exists.",
-      hint: "Reconcile the database migration history.",
-    });
+    const cause = Object.assign(
+      new Error('relation "products" already exists'),
+      {
+        code: "42P07",
+        detail: "A relation with that name already exists.",
+        hint: "Reconcile the database migration history.",
+      },
+    );
     const error = new Error("Failed query: CREATE TABLE products", { cause });
-    expect(migrationError(error)).toContain('Migration failed: relation "products" already exists');
+    expect(migrationError(error)).toContain(
+      'Migration failed: relation "products" already exists',
+    );
     expect(migrationError(error)).toContain("Database error 42P07");
-    expect(migrationError(error)).toContain("A relation with that name already exists.");
+    expect(migrationError(error)).toContain(
+      "A relation with that name already exists.",
+    );
     expect(migrationError(error)).toContain("already contains this table");
   });
   test("reports the installed CLI package version", async () => {
@@ -120,7 +127,9 @@ describe("critical generation flow", () => {
     expect(sidebar).toContain("group-data-[collapsible=icon]:hidden");
     const manifest = await Bun.file(join(path, "package.json")).json();
     const env = await Bun.file(join(path, ".env.example")).text();
-    const webManifest = await Bun.file(join(path, "web", "package.json")).json();
+    const webManifest = await Bun.file(
+      join(path, "web", "package.json"),
+    ).json();
     expect(manifest.devDependencies.pg).toBeUndefined();
     expect(manifest.devDependencies.typescript).toBe("7.0.2");
     expect(env).toContain("/shop_development");
@@ -152,7 +161,9 @@ describe("critical generation flow", () => {
       const path = join(root, "app");
       await createProject(path, { install: false, database: adapter });
       const index = await Bun.file(join(path, "src/db/index.ts")).text();
-      expect(index).toContain(adapter === "sqlite" ? "sqliteDrizzle" : "mysqlDrizzle");
+      expect(index).toContain(
+        adapter === "sqlite" ? "sqliteDrizzle" : "mysqlDrizzle",
+      );
       const manifest = await Bun.file(join(path, "package.json")).json();
       expect(manifest.devDependencies.pg).toBeUndefined();
       if (adapter === "mysql")
@@ -187,11 +198,7 @@ describe("critical generation flow", () => {
       database: "legacy",
     });
     const config = await databaseConfig(path);
-    expect(Object.keys(config)).toEqual([
-      "primary",
-      "analytics",
-      "legacy",
-    ]);
+    expect(Object.keys(config)).toEqual(["primary", "analytics", "legacy"]);
     const analyticsSchema = await Bun.file(
       join(path, "src/db/analytics/schema/events.ts"),
     ).text();
@@ -258,8 +265,15 @@ describe("critical generation flow", () => {
     const sidebar = await Bun.file(
       join(path, "web/src/lib/components/app-sidebar.svelte"),
     ).text();
-    expect(sidebar).toContain("authClient.useSession()");
-    expect(sidebar).toContain("$authSession.data ? '/account' : '/login'");
+    const manifest = await Bun.file(join(path, "package.json")).json();
+    const webManifest = await Bun.file(join(path, "web/package.json")).json();
+    expect(manifest.dependencies["better-auth"]).toBe("^1.7.1");
+    expect(manifest.dependencies["@better-auth/drizzle-adapter"]).toBe(
+      "^1.7.1",
+    );
+    expect(webManifest.dependencies["better-auth"]).toBe("^1.7.1");
+    expect(sidebar).not.toContain("auth-client");
+    expect(sidebar).toContain('href="/account"');
   });
 
   test("validates auth feature combinations", () => {
@@ -840,10 +854,16 @@ describe("critical generation flow", () => {
       const joinSchema = await Bun.file(
         join(path, "src/db/schema/post-taggings.ts"),
       ).text();
-      const schemaIndex = await Bun.file(join(path, "src/db/schema/index.ts")).text();
-      expect(joinSchema).toContain(adapter === "mysql" ? "mysqlTable" : "sqliteTable");
+      const schemaIndex = await Bun.file(
+        join(path, "src/db/schema/index.ts"),
+      ).text();
+      expect(joinSchema).toContain(
+        adapter === "mysql" ? "mysqlTable" : "sqliteTable",
+      );
       expect(joinSchema).toContain("taggableType");
-      expect(schemaIndex).toContain("export { postTaggings } from './post-taggings'");
+      expect(schemaIndex).toContain(
+        "export { postTaggings } from './post-taggings'",
+      );
     }
   });
 
