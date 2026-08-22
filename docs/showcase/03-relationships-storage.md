@@ -67,13 +67,13 @@ import { and, asc, desc, eq } from 'drizzle-orm'
 import { db } from '../db'
 import {
   comments,
-  postTaggings,
   posts,
   storageAttachments,
   storageBlobs,
   tags,
   users,
 } from '../db/schema'
+import { postTaggings } from '../db/schema/post-taggings'
 import { storage } from '../storage'
 
 export const blogRoutes = new Elysia({ prefix: '/blog' }).get('/', async () => {
@@ -193,7 +193,6 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
   import { onMount } from 'svelte'
   import { treaty } from '@elysiajs/eden'
   import type { App } from '../../../../src/app'
-  import { formatDisplayDate } from '$lib/date-time.svelte.js'
   import CommentThread, { type BlogComment } from '$lib/components/comment-thread.svelte'
 
   const api = treaty<App>('http://localhost:3000')
@@ -210,6 +209,13 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
   }
   let posts = $state<BlogPost[]>([])
   let message = $state('')
+
+  function formatDate(value: string) {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  }
 
   function thread(comments: BlogComment[]) {
     const nodes = new Map(
@@ -256,7 +262,7 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
           </div>
           <h2 class="mt-4 text-3xl font-bold">{post.title}</h2>
           <p class="mt-2 text-sm text-muted-foreground">
-            By {post.authorName}{#if post.publishedAt} · {formatDisplayDate(post.publishedAt)}{/if}
+            By {post.authorName}{#if post.publishedAt} · {formatDate(post.publishedAt)}{/if}
           </p>
           {#if post.excerpt}<p class="mt-5 text-lg text-muted-foreground">{post.excerpt}</p>{/if}
           <p class="mt-5 whitespace-pre-line leading-8">{post.body}</p>

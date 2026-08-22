@@ -797,6 +797,9 @@ describe("critical generation flow", () => {
     const joinSchema = await Bun.file(
       join(path, "src/db/schema/taggings.ts"),
     ).text();
+    const schemaIndex = await Bun.file(
+      join(path, "src/db/schema/index.ts"),
+    ).text();
     const route = await Bun.file(join(path, "src/routes/products.ts")).text();
     const page = await Bun.file(
       join(path, "web/src/routes/products/+page.svelte"),
@@ -813,6 +816,7 @@ describe("critical generation flow", () => {
       "table.tagId, table.taggableType, table.taggableId",
     );
     expect(joinSchema).not.toContain("references(() => products.id");
+    expect(schemaIndex).toContain("export { taggings } from './taggings'");
     expect(route).toContain("eq(taggings.taggableType, 'Product')");
     expect(route).toContain("eq(taggings.taggableType, 'Product'),");
     expect(route).toContain("inArray(");

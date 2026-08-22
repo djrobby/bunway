@@ -11,7 +11,8 @@ Create `src/db/seed.ts`:
 
 ```ts
 import { db } from './index'
-import { categories, comments, postTaggings, posts, products, tags, users } from './schema'
+import { categories, comments, posts, products, tags, users } from './schema'
+import { postTaggings } from './schema/post-taggings'
 
 const [category] = await db
   .insert(categories)
