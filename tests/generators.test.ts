@@ -18,6 +18,7 @@ import { consoleCommand } from "../packages/cli/src/console";
 import { addDatabase, databaseConfig } from "../packages/cli/src/databases";
 import { generateAuth, normalizeAuthOptions } from "../packages/cli/src/auth";
 import { generateAudit } from "../packages/cli/src/audit";
+import { cliVersion } from "../packages/cli/src/version";
 
 async function app() {
   const root = await mkdtemp(join(tmpdir(), "bunway-"));
@@ -27,6 +28,13 @@ async function app() {
 }
 
 describe("critical generation flow", () => {
+  test("reports the installed CLI package version", async () => {
+    const manifest = await Bun.file(
+      join(import.meta.dir, "../packages/cli/package.json"),
+    ).json();
+    expect(await cliVersion()).toBe(manifest.version);
+  });
+
   test("starts the web workspace with Bun run argument ordering", () => {
     expect(developmentCommands[1]).toEqual([
       "bun",

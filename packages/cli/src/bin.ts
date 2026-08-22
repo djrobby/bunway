@@ -22,11 +22,14 @@ import {
 } from "./auth";
 import { generateAudit } from "./audit";
 import { generateMailer, generateSms } from "./messaging";
+import { cliVersion } from "./version";
 
 const [command, ...args] = Bun.argv.slice(2);
 
 async function main() {
   if (!command || ["help", "--help", "-h"].includes(command)) return help();
+  if (["version", "--version", "-v"].includes(command))
+    return console.log(await cliVersion());
   if (command === "new")
     return createProject(args[0], {
       install: !args.includes("--no-install"),
@@ -285,9 +288,10 @@ async function main() {
   throw new CliError(`Unknown command "${command}". Run bunway help.`);
 }
 
-function help() {
-  console.log(`Bunway v0.1 developer preview
+async function help() {
+  console.log(`Bunway ${await cliVersion()}
 
+  bunway --version | bunway -v
   bunway new <name> [--api-only] [--database=postgres|mysql|sqlite|pocketbase]
   bunway dev
   bunway g model <Name> [field:type...]

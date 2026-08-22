@@ -35,6 +35,7 @@ bunway dev
 bunway dev
 bunway routes
 bunway console
+bunway --version
 
 bunway g model User email:string:unique
 bunway g resource Customer name:string email:string

@@ -7,6 +7,7 @@ title: CLI reference
 
 | Command | Syntax summary |
 | --- | --- |
+| Version | `bunway --version`, `bunway -v` |
 | Create | `bunway new <name> [--no-install] [--api-only] [--database=postgres\|mysql\|sqlite\|pocketbase]` |
 | Develop | `bunway dev`, `bunway routes`, `bunway console` / `c` |
 | Generate | `bunway generate` / `g <kind> ...` |
@@ -35,6 +36,7 @@ are preferred for scripts and coding agents.
 | Command                                        | Purpose                                                          |
 | ---------------------------------------------- | ---------------------------------------------------------------- |
 | `bunway new <name>`                            | Create an application.                                           |
+| `bunway --version`, `bunway -v`                | Print the installed Bunway CLI version.                          |
 | `bunway new <name> --no-install`               | Create without running `bun install`.                            |
 | `bunway new <name> --database=<adapter>`       | Select the primary adapter; default `postgres`.                  |
 | `bunway new <name> --api-only`                 | Create an API application without SvelteKit.                     |
