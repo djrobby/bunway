@@ -12,6 +12,13 @@ All package installation, scripts, tests, package executables, and process orche
 
 Generators update small schema, route, and job index files. This keeps registrations visible and avoids filesystem discovery or runtime reflection.
 
+## Showcase relationship intent
+
+The publishing showcase uses polymorphic `postTaggings` deliberately. Ordinary `many_to_many` remains
+a separate documented generator pattern and must not be substituted into the Blog query merely to
+make an app created from an obsolete tutorial appear compatible. Preview showcase apps are disposable;
+the guide tells affected users to regenerate the demo so its schema matches the lesson.
+
 ## Jobs are the only v0.1 runtime abstraction
 
 The CLI generates ordinary application code. `@bunway/core` exists only for the PostgreSQL queue, where Bun, Elysia, and Drizzle do not provide a job API.

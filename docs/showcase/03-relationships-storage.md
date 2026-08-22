@@ -23,6 +23,29 @@ The polymorphic modifiers produce `post-taggings.ts` with `taggableType` and `ta
 the Blog query below expects. Restart `bunway dev`; confirm `/users`, `/tags`, `/posts`, and `/comments`
 appear. Create one User and Tag before creating a Post.
 
+:::warning Continuing a showcase created from the earlier tutorial?
+The earlier tutorial incorrectly generated Post with the ordinary `tags:many_to_many` relationship,
+which created `src/db/schema/posts-to-tags.ts`. That schema cannot demonstrate polymorphism and is not
+the canonical publishing showcase described here.
+
+Because this walkthrough is for a disposable demo application, create a fresh showcase and run the
+commands above exactly. Before adding Blog code, verify that this file exists:
+
+```text
+src/db/schema/post-taggings.ts
+```
+
+and that `src/db/schema/index.ts` contains:
+
+```ts
+export { postTaggings } from './post-taggings'
+```
+
+Do not substitute `postsToTags` in the Blog query: that would make the page work while defeating the
+polymorphic example. Ordinary many-to-many remains a separate supported pattern documented in
+[Relationships](/relationships#collection-relationships).
+:::
+
 ## 2. Add nested comments
 
 Open `src/db/schema/comments.ts`. Add `type AnyPgColumn` to the import from

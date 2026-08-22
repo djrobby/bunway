@@ -93,6 +93,8 @@ test('showcase guide stays aligned with the maintained test application', async 
   }
   expect(showcase).toContain("import { blogRoutes } from './blog'")
   expect(showcase).toContain("import { postTaggings } from '../db/schema/post-taggings'")
+  expect(showcase).toContain("export { postTaggings } from './post-taggings'")
+  expect(showcase).toContain('Do not substitute `postsToTags`')
   expect(showcase).not.toContain("$lib/date-time.svelte.js")
   expect(showcase).toContain("import { realtimeShowcaseRoutes } from './realtime'")
   expect(showcase).toContain("import { auditShowcaseRoutes } from './audit'")
