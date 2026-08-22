@@ -1,0 +1,27 @@
+{
+  "name": "local-package-smoke",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "web"
+  ],
+  "scripts": {
+    "dev": "bunway dev",
+    "build": "bun run --cwd web build",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit && bun run --cwd web check"
+  },
+  "dependencies": {
+    "@bunway/cli": "file:../packages/cli",
+    "@bunway/core": "file:../packages/core",
+    "@elysiajs/cors": "latest",
+    "@elysiajs/eden": "latest",
+    "drizzle-orm": "latest",
+    "elysia": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "latest",
+    "typescript": "latest"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "bunway-app",
+  "private": true,
+  "type": "module",
+  "workspaces": ["web"],
+  "scripts": {
+    "dev": "bunway dev",
+    "build": "bun run --cwd web build",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit && bun run --cwd web check"
+  },
+  "dependencies": {
+    "@bunway/cli": "latest",
+    "@bunway/core": "latest",
+    "@elysiajs/cors": "latest",
+    "@elysiajs/eden": "latest",
+    "drizzle-orm": "latest",
+    "elysia": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "latest",
+    "typescript": "latest"
+  }
+}

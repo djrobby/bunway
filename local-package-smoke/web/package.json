@@ -1,0 +1,29 @@
+{
+  "name": "web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "svelte-kit sync && svelte-check --tsgo --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-auto": "latest",
+    "@sveltejs/kit": "latest",
+    "@sveltejs/vite-plugin-svelte": "latest",
+    "@tailwindcss/vite": "latest",
+    "svelte": "latest",
+    "svelte-check": "latest",
+    "tailwindcss": "latest",
+    "@typescript/native": "npm:typescript@latest",
+    "typescript": "~6.0.0",
+    "vite": "latest"
+  },
+  "dependencies": {
+    "bits-ui": "latest",
+    "clsx": "2.1.1",
+    "remixicon-svelte": "0.0.5",
+    "tailwind-merge": "3.6.0",
+    "tailwind-variants": "3.3.1"
+  }
+}

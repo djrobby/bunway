@@ -1,0 +1,40 @@
+{
+  "name": "bunway",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "bun run --filter '*' typecheck",
+    "release": "bun scripts/release.ts",
+    "docs:dev": "docusaurus start --port 3001",
+    "docs:build": "docusaurus build",
+    "docs:serve": "docusaurus serve --port 3001"
+  },
+  "devDependencies": {
+    "@docusaurus/core": "3.10.2",
+    "@docusaurus/preset-classic": "3.10.2",
+    "@elysiajs/cors": "^1.4.2",
+    "@elysiajs/eden": "^1.4.9",
+    "@mdx-js/react": "3.1.1",
+    "@sveltejs/adapter-auto": "^7.0.1",
+    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/bun": "^1.4.0",
+    "bits-ui": "2.19.0",
+    "clsx": "2.1.1",
+    "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
+    "elysia": "^1.4.29",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remixicon-svelte": "0.0.5",
+    "svelte": "^5.56.10",
+    "svelte-check": "^4.7.6",
+    "tailwind-merge": "3.6.0",
+    "tailwind-variants": "3.3.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "7.0.2",
+    "vite": "^8.2.2"
+  }
+}

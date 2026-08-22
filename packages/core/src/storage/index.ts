@@ -1,0 +1,6 @@
+export { attachmentHydrator } from './attachment'
+export { LocalStorageAdapter } from './local'
+export { S3StorageAdapter } from './s3'
+export { uploadedFile } from './types'
+export type { Attachment, AttachmentItem, Attachments, AttachmentDefinition } from './attachment'
+export type { StorageAdapter, StoredObject, UploadedFile } from './types'

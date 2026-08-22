@@ -1,0 +1,21 @@
+{
+  "name": "@bunway/core",
+  "version": "0.1.0-preview.2",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./realtime": "./src/realtime-server.ts",
+    "./realtime/browser": "./src/realtime-browser.ts"
+  },
+  "scripts": {
+    "typecheck": "bunx tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "elysia": "^1.4.29",
+    "nodemailer": "9.0.5"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "8.0.1"
+  }
+}

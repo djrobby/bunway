@@ -1,0 +1,19 @@
+{
+  "name": "@bunway/cli",
+  "version": "0.1.0-preview.2",
+  "type": "module",
+  "bin": {
+    "bunway": "./src/bin.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "bunx tsc --noEmit --skipLibCheck"
+  },
+  "dependencies": {
+    "@bunway/core": "workspace:*",
+    "prettier": "3.9.6",
+    "prettier-plugin-svelte": "4.1.1"
+  }
+}
