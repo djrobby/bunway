@@ -257,6 +257,12 @@ describe("critical generation flow", () => {
     expect(
       await Bun.file(join(path, "web/src/routes/login/+page.svelte")).exists(),
     ).toBe(true);
+    const loginPage = await Bun.file(
+      join(path, "web/src/routes/login/+page.svelte"),
+    ).text();
+    expect(loginPage).toContain("new URL('/', window.location.origin).toString()");
+    expect(loginPage).toContain("callbackURL: browserCallbackURL()");
+    expect(loginPage).not.toContain("callbackURL: '/'");
     expect(
       await Bun.file(
         join(path, "web/src/routes/account/security/+page.svelte"),

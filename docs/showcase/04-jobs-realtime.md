@@ -118,12 +118,12 @@ let eventsPublished = 0
 let jobsRunning = 0
 let statusChanges = 0
 
+function dashboardMetrics() {
+  return { statusChanges, eventsPublished, jobsRunning }
+}
+
 function dashboard() {
-  dashboardChannel.publish('updated', {
-    statusChanges,
-    eventsPublished,
-    jobsRunning,
-  })
+  dashboardChannel.publish('updated', dashboardMetrics())
 }
 
 export const realtimeShowcaseRoutes = new Elysia({
@@ -145,7 +145,11 @@ export const realtimeShowcaseRoutes = new Elysia({
     dashboard()
     return data
   })
-  .get('/status', () => ({ id: 'DEMO-1001', status: statuses[statusIndex] }))
+  .get('/status', () => ({
+    id: 'DEMO-1001',
+    status: statuses[statusIndex],
+    ...dashboardMetrics(),
+  }))
   .post('/status', () => {
     statusIndex = (statusIndex + 1) % statuses.length
     statusChanges++
@@ -158,7 +162,7 @@ export const realtimeShowcaseRoutes = new Elysia({
   .post('/activity', () => {
     eventsPublished++
     dashboard()
-    return { ok: true }
+    return dashboardMetrics()
   })
   .post('/jobs', () => {
     jobsRunning++
@@ -223,6 +227,16 @@ Create `web/src/routes/realtime/+page.svelte`:
   let chatMessages = $state<ChatEvents['message'][]>([])
   let chat: ReturnType<typeof realtime.connect<ChatEvents>> | undefined
 
+  function setDashboard(data: {
+    statusChanges: number
+    eventsPublished: number
+    jobsRunning: number
+  }) {
+    statusChanges = data.statusChanges
+    eventsPublished = data.eventsPublished
+    jobsRunning = data.jobsRunning
+  }
+
   onMount(() => {
     const notificationSubscription = realtime.subscribe('notifications', (event) => {
       notification = (event.data as { message: string }).message
@@ -236,9 +250,7 @@ Create `web/src/routes/realtime/+page.svelte`:
         eventsPublished: number
         jobsRunning: number
       }
-      statusChanges = data.statusChanges
-      eventsPublished = data.eventsPublished
-      jobsRunning = data.jobsRunning
+      setDashboard(data)
     })
     const jobSubscription = realtime.job('demo-file', (event) => {
       jobProgress = event.data.progress
@@ -250,8 +262,13 @@ Create `web/src/routes/realtime/+page.svelte`:
     })
     void fetch(`${api}/status`)
       .then((response) => response.json())
-      .then((data) => (status = data.status))
-    void fetch(`${api}/activity`, { method: 'POST' })
+      .then((data) => {
+        status = data.status
+        setDashboard(data)
+        return fetch(`${api}/activity`, { method: 'POST' })
+      })
+      .then((response) => response.json())
+      .then(setDashboard)
     return () => {
       notificationSubscription.close()
       statusSubscription.close()

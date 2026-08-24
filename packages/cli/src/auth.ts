@@ -380,6 +380,7 @@ function loginPage(options: Required<AuthOptions>) {
   let error = $state('')
   let needsTwoFactor = $state(false)
   let factor = $state<'totp' | 'backup' | 'otp'>('totp')
+  const browserCallbackURL = () => new URL('/', window.location.origin).toString()
   async function signIn() {
     error = ''
     const result = await authClient.signIn.email({ email, password })
@@ -402,7 +403,7 @@ function loginPage(options: Required<AuthOptions>) {
     error = result.error?.message ?? 'Check your email or the development server console.'
   }
   async function magicLink() {
-    const result = await authClient.signIn.magicLink({ email, callbackURL: '/' })
+    const result = await authClient.signIn.magicLink({ email, callbackURL: browserCallbackURL() })
     error = result.error?.message ?? 'Check your email or the development server console.'
   }
 </script>
@@ -410,7 +411,7 @@ function loginPage(options: Required<AuthOptions>) {
 <main class="mx-auto max-w-md space-y-6 p-8"><h1 class="text-3xl font-semibold">Sign in</h1>
 {#if error}<p class="rounded border p-3 text-sm">{error}</p>{/if}
 ${options.password ? `{#if needsTwoFactor}<form class="space-y-4" onsubmit={(event) => { event.preventDefault(); verify() }}><label class="block">{factor === 'backup' ? 'Recovery code' : factor === 'otp' ? 'Email code' : 'Authenticator code'}<input class="mt-1 w-full rounded border bg-background p-2" bind:value={code} autocomplete="one-time-code" /></label><button class="w-full rounded bg-primary p-2 text-primary-foreground">Verify</button></form><div class="flex flex-wrap gap-2"><button class="rounded border px-3 py-2" onclick={() => factor = 'totp'}>Authenticator</button>${options.mfa.includes("backup-codes") ? `<button class="rounded border px-3 py-2" onclick={() => factor = 'backup'}>Recovery code</button>` : ""}${options.mfa.includes("email-otp") ? `<button class="rounded border px-3 py-2" onclick={sendOtp}>Email a code</button>` : ""}</div>{:else}<form class="space-y-4" onsubmit={(event) => { event.preventDefault(); signIn() }}><label class="block">Email<input class="mt-1 w-full rounded border bg-background p-2" type="email" bind:value={email} autocomplete="email" required /></label><label class="block">Password<input class="mt-1 w-full rounded border bg-background p-2" type="password" bind:value={password} autocomplete="current-password" required /></label><button class="w-full rounded bg-primary p-2 text-primary-foreground">Sign in</button></form>{/if}` : ""}
-${options.oauth.map((provider) => `<button class="w-full rounded border p-2" onclick={() => authClient.signIn.social({ provider: '${provider}', callbackURL: '/' })}>Continue with ${provider[0]!.toUpperCase() + provider.slice(1)}</button>`).join("\n")}
+${options.oauth.map((provider) => `<button class="w-full rounded border p-2" onclick={() => authClient.signIn.social({ provider: '${provider}', callbackURL: browserCallbackURL() })}>Continue with ${provider[0]!.toUpperCase() + provider.slice(1)}</button>`).join("\n")}
 ${options.magicLink ? `<form class="space-y-3 border-t pt-4" onsubmit={(event) => { event.preventDefault(); magicLink() }}><label class="block">Email for magic link<input class="mt-1 w-full rounded border bg-background p-2" type="email" bind:value={email} required /></label><button class="w-full rounded border p-2">Send magic link</button></form>` : ""}
 ${options.passkeys ? `<button class="w-full rounded border p-2" onclick={() => authClient.signIn.passkey()}>Sign in with a passkey</button>` : ""}
 ${options.password ? `<p class="text-sm">No account? <a class="underline" href="/register">Create one</a></p>` : ""}</main>`;

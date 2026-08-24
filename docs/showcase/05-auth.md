@@ -29,6 +29,9 @@ AUTH_APP_NAME=Bunway Showcase
 
 OAuth callbacks are `http://localhost:3000/api/auth/callback/google` and `/github`. Without both client
 values, development disables that provider with guidance; password registration still works.
+Those API URLs verify the provider response. The generated browser page sends its absolute UI origin as
+the final callback, so OAuth and magic-link sign-in return to `http://localhost:5173/` in development.
+An API-only client may omit `callbackURL` or supply a different absolute destination.
 
 Restart `bunway dev` after editing `.env`. The generator already created and registered
 `src/auth/index.ts`, `src/auth/plugin.ts`, `src/routes/account.ts`, `web/src/lib/auth-client.ts`, and the

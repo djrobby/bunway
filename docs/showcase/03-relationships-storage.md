@@ -470,6 +470,7 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
   let users = $state<{ id: string; name: string }[]>([])
   let userId = $state('')
   let message = $state('')
+  let rootComments = $state<Record<string, string>>({})
 
   function formatDate(value: string) {
     return new Intl.DateTimeFormat(undefined, {
@@ -511,6 +512,17 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
     const refreshed = await api.blog.get()
     if (!refreshed.error) posts = (refreshed.data ?? []) as BlogPost[]
   }
+
+  async function comment(postId: string) {
+    const body = rootComments[postId]?.trim()
+    if (!body) return
+    if (!userId) { message = 'Create or select a User before commenting.'; return }
+    const result = await api.comments.post({ body, postId, userId, approved: true })
+    if (result.error) { message = 'Could not post the comment.'; return }
+    rootComments[postId] = ''
+    const refreshed = await api.blog.get()
+    if (!refreshed.error) posts = (refreshed.data ?? []) as BlogPost[]
+  }
 </script>
 
 <svelte:head><title>Bunway Blog Showcase</title></svelte:head>
@@ -549,10 +561,14 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
                 {#each users as user}<option value={user.id}>{user.name}</option>{/each}
               </select>
             </label>
+            <form class="mb-6 flex gap-2" onsubmit={(event) => { event.preventDefault(); void comment(post.id) }}>
+              <input class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" bind:value={rootComments[post.id]} placeholder="Join the discussion…" aria-label={`New comment on ${post.title}`} required />
+              <button class="rounded-md bg-primary px-4 py-2 text-primary-foreground">Comment</button>
+            </form>
             {#if post.comments.length}
               <CommentThread comments={thread(post.comments)} onreply={(parentId, body) => reply(post.id, parentId, body)} />
             {:else}
-              <p class="text-muted-foreground">No comments yet.</p>
+              <p class="text-muted-foreground">No comments yet. Start the discussion above.</p>
             {/if}
           </section>
         </div>

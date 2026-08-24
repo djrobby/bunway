@@ -64,6 +64,8 @@ In development, a selected provider with missing credentials is disabled and con
 
 Magic links, email OTP, and email-based MFA use Bunway Mail through `mail.send()`. There is no separate Auth transport. With no provider in development, the Mail console driver displays the local testing link or code while Audit records only outcome metadata—not the body, token, URL, or OTP. Production requires Resend or SMTP and never falls back to console delivery. See [Messaging](./messaging.md).
 
+A magic-link or OAuth callback first reaches the API because Better Auth must verify the token or provider response there. The generated browser sign-in page supplies its absolute `window.location.origin` as the final callback, so successful sign-in returns to the Svelte UI even when `BETTER_AUTH_URL` points at a separate API origin. API-only clients can omit `callbackURL` to remain on the API or pass their own absolute destination. Keep the API origin in OAuth provider consoles; it is the verification endpoint, not the final page shown to the user.
+
 ## MFA and passkeys
 
 `--mfa=totp,backup-codes` generates Better Auth's two-factor plugin and a security page. Enabling TOTP renders a QR code plus Better Auth's setup URI and one-time recovery codes; the user verifies an authenticator code before MFA becomes active. `trusted-devices` uses Better Auth's `trustDevice` option. `email-otp` shares the development mail hook.

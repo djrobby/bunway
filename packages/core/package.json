@@ -1,6 +1,6 @@
 {
   "name": "@bunway/core",
-  "version": "0.1.0-preview.8",
+  "version": "0.1.0-preview.9",
   "description": "Thin Bun-native runtime primitives for Bunway Jobs, Realtime, Audit, Messaging, Storage, and configuration.",
   "keywords": [
     "bun",
