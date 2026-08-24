@@ -1,8 +1,8 @@
 ---
-title: 5. Add authentication and MFA
+title: 6. Add authentication and MFA
 ---
 
-# 5. Add authentication and MFA
+# 6. Add authentication and MFA
 
 ```sh
 bunway g auth --password --magic-link --oauth=google,github --mfa=totp,backup-codes --database=primary
@@ -36,10 +36,16 @@ four Auth pages. Do not create a second auth client or manually add Auth to `res
 sidebar uses a dependency-free **Account** link so an Auth-only error cannot prevent unrelated resource
 pages from rendering.
 
-Seed an account through Better Auth's ordinary HTTP endpoint (use `curl.exe` in PowerShell):
+Seed an account through Better Auth's ordinary HTTP endpoint. On macOS/Linux:
 
 ```sh
-curl -X POST http://localhost:3000/api/auth/sign-up/email -H "content-type: application/json" -d '{"name":"Ada Lovelace","email":"ada@example.test","password":"correct-horse-battery-staple"}'
+curl --silent --fail-with-body --request POST http://localhost:3000/api/auth/sign-up/email --header 'content-type: application/json' --data-raw '{"name":"Ada Lovelace","email":"ada@example.test","password":"correct-horse-battery-staple"}'
+```
+
+On Windows PowerShell:
+
+```powershell
+curl.exe --silent --fail-with-body --request POST http://localhost:3000/api/auth/sign-up/email --header "content-type: application/json" --data-raw '{"name":"Ada Lovelace","email":"ada@example.test","password":"correct-horse-battery-staple"}'
 ```
 
 :::tip Verify it
@@ -54,4 +60,4 @@ curl -X POST http://localhost:3000/api/auth/sign-up/email -H "content-type: appl
    :::
 
 MFA currently challenges password sign-in; read [Authentication](../authentication.md) before imposing a
-broader policy. Next: [add Audit and Messaging](./06-audit-messaging.md).
+broader policy. Next: [build the Audit showcase](./06-audit.md).

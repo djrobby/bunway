@@ -1,10 +1,10 @@
 ---
-title: 4. Build the Jobs and Realtime showcase
+title: 5. Build the Jobs and Realtime showcase
 ---
 
-# 4. Build the Jobs and Realtime showcase
+# 5. Build the Jobs and Realtime showcase
 
-This step builds the complete `/realtime` page from the maintained test app: notifications, live order
+This step builds the complete `/realtime` page from the [finished Showcase](./index.md): notifications, live order
 status, Job progress, dashboard counters, and WebSocket chat.
 
 The interactive page runs the Job handler immediately, so it works with PostgreSQL, MySQL, and SQLite.
@@ -46,7 +46,7 @@ export const processDemoFile = job(
 )
 ```
 
-Open `src/jobs/index.ts` and confirm it contains this export before `// bunway:jobs`:
+Open `src/jobs/index.ts` and confirm this export appears immediately before `// bunway:jobs`:
 
 ```ts
 export { processDemoFile } from './process-demo-file'
@@ -107,7 +107,12 @@ import {
   orderStatusChannel,
 } from '../realtime/showcase'
 
-const statuses = ['received', 'processing', 'quality_check', 'completed'] as const
+const statuses = [
+  'received',
+  'processing',
+  'quality_check',
+  'completed',
+] as const
 let statusIndex = 0
 let eventsPublished = 0
 let jobsRunning = 0
@@ -121,7 +126,9 @@ function dashboard() {
   })
 }
 
-export const realtimeShowcaseRoutes = new Elysia({ prefix: '/realtime/showcase' })
+export const realtimeShowcaseRoutes = new Elysia({
+  prefix: '/realtime/showcase',
+})
   .post('/notifications', () => {
     const messages = [
       'Background maintenance will begin in 10 minutes.',
@@ -165,23 +172,30 @@ export const realtimeShowcaseRoutes = new Elysia({ prefix: '/realtime/showcase' 
   })
 ```
 
-Register it in `src/routes/index.ts` by adding:
+In `src/routes/index.ts`, insert this immediately before `// bunway:imports`:
 
 ```ts
 import { realtimeShowcaseRoutes } from './realtime'
 ```
 
-and, before `// bunway:routes`:
+Insert this immediately before `// bunway:routes`:
 
 ```ts
 .use(realtimeShowcaseRoutes)
 ```
 
-Restart `bunway dev`. Verify the HTTP portion before adding UI:
+Restart `bunway dev`. On macOS/Linux, verify the HTTP portion before adding UI:
 
 ```sh
 curl http://localhost:3000/realtime/showcase/status
 curl -X POST http://localhost:3000/realtime/showcase/notifications
+```
+
+On Windows PowerShell:
+
+```powershell
+curl.exe http://localhost:3000/realtime/showcase/status
+curl.exe --request POST http://localhost:3000/realtime/showcase/notifications
 ```
 
 ## 5. Create the complete Svelte page
@@ -342,7 +356,7 @@ Create `web/src/routes/realtime/+page.svelte`:
 
 ## 6. Add navigation and verify
 
-Insert this before `// bunway:resources` in `web/src/lib/resources.ts`:
+In `web/src/lib/resources.ts`, insert this immediately before `// bunway:resources`:
 
 ```ts
 { label: 'Realtime Showcase', href: '/realtime', icon: 'chat' },

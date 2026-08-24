@@ -84,10 +84,16 @@ and generated source, not replacement layers.
 :::tip Verify it
 Open `http://localhost:3000` and `http://localhost:5173`. In another terminal, from `showcase/`, run
 `bunway routes`. You should see `GET /` plus the framework-owned Storage and Realtime transport routes.
-Verify the API without a browser too:
+Verify the API without a browser too. On macOS/Linux use:
 
 ```sh
 curl http://localhost:3000
+```
+
+On Windows PowerShell use:
+
+```powershell
+curl.exe http://localhost:3000
 ```
 
 :::

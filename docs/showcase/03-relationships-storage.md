@@ -5,7 +5,7 @@ title: 3. Build the publishing showcase
 # 3. Build the publishing showcase
 
 This step creates the Users, Tags, Posts, and Comments CRUD screens, then composes them into the same
-public `/blog` experience used by `bunway-test-app`. Run every command from `showcase/`.
+public `/blog` experience in the [finished Showcase](./index.md). Run every command from `showcase/`.
 
 ## 1. Generate the resources
 
@@ -23,13 +23,7 @@ The polymorphic modifiers produce `post-taggings.ts` with `taggableType` and `ta
 the Blog query below expects. Restart `bunway dev`; confirm `/users`, `/tags`, `/posts`, and `/comments`
 appear. Create one User and Tag before creating a Post.
 
-:::warning Continuing a showcase created from the earlier tutorial?
-The earlier tutorial incorrectly generated Post with the ordinary `tags:many_to_many` relationship,
-which created `src/db/schema/posts-to-tags.ts`. That schema cannot demonstrate polymorphism and is not
-the canonical publishing showcase described here.
-
-Because this walkthrough is for a disposable demo application, create a fresh showcase and run the
-commands above exactly. Before adding Blog code, verify that this file exists:
+Before adding Blog code, verify that this file exists:
 
 ```text
 src/db/schema/post-taggings.ts
@@ -41,50 +35,82 @@ and that `src/db/schema/index.ts` contains:
 export { postTaggings } from './post-taggings'
 ```
 
-Do not substitute `postsToTags` in the Blog query: that would make the page work while defeating the
-polymorphic example. Ordinary many-to-many remains a separate supported pattern documented in
-[Relationships](/relationships#collection-relationships).
-:::
+The Blog query deliberately uses `postTaggings` to demonstrate polymorphism. Ordinary many-to-many
+remains a separate supported pattern documented in [Relationships](/relationships#collection-relationships).
 
 ## 2. Add nested comments
 
-Open `src/db/schema/comments.ts`. Add the matching column type and builder to its existing Drizzle core
-import, then add `parentId` after `userId`.
+Open `src/db/schema/comments.ts`. The generated column section starts like this:
 
-PostgreSQL:
+```ts title="Before: comments table"
+userId: uuid('userId')
+  .notNull()
+  .references(() => users.id),
+approved: boolean('approved').notNull().default(false),
+```
 
-```ts
+Change that focused section to the matching version for your database.
+
+PostgreSQL (also add `type AnyPgColumn` to the existing `drizzle-orm/pg-core` import):
+
+```ts title="After: PostgreSQL"
+userId: uuid('userId')
+  .notNull()
+  .references(() => users.id),
 parentId: uuid('parentId').references((): AnyPgColumn => comments.id, {
   onDelete: 'cascade',
 }),
+approved: boolean('approved').notNull().default(false),
 ```
 
-MySQL (`AnyMySqlColumn` and `varchar` come from `drizzle-orm/mysql-core`):
+MySQL (also add `type AnyMySqlColumn` to the existing `drizzle-orm/mysql-core` import):
 
-```ts
+```ts title="After: MySQL"
+userId: varchar('userId', { length: 36 })
+  .notNull()
+  .references(() => users.id),
 parentId: varchar('parentId', { length: 36 }).references(
   (): AnyMySqlColumn => comments.id,
   { onDelete: 'cascade' },
 ),
+approved: boolean('approved').notNull().default(false),
 ```
 
-SQLite (`AnySQLiteColumn` and `text` come from `drizzle-orm/sqlite-core`):
+SQLite (also add `type AnySQLiteColumn` to the existing `drizzle-orm/sqlite-core` import):
 
-```ts
+```ts title="After: SQLite"
+userId: text('userId')
+  .notNull()
+  .references(() => users.id),
 parentId: text('parentId').references((): AnySQLiteColumn => comments.id, {
   onDelete: 'cascade',
 }),
+approved: integer('approved', { mode: 'boolean' }).notNull().default(false),
 ```
 
-Add this alongside the generated indexes:
+The end of the generated index list looks like this:
 
-```ts
+```ts title="Before: indexes"
+index('comments_userId_idx').on(table.userId),
+```
+
+Change it to:
+
+```ts title="After: indexes"
+index('comments_userId_idx').on(table.userId),
 index('comments_parentId_idx').on(table.parentId),
 ```
 
-Add these inside `commentsRelations`:
+The generated relations end with the User relation:
 
-```ts
+```ts title="Before: relations"
+user: one(users, { fields: [comments.userId], references: [users.id] }),
+```
+
+Change that ending to:
+
+```ts title="After: relations"
+user: one(users, { fields: [comments.userId], references: [users.id] }),
 parent: one(comments, {
   fields: [comments.parentId],
   references: [comments.id],
@@ -99,17 +125,51 @@ Apply it:
 bunway db:migrate
 ```
 
-The schema edit must also cross the API and UI boundaries. In `src/routes/comments.ts`, add this to
-the generated request body after `userId`:
+The schema edit must also cross the API and UI boundaries. In `src/routes/comments.ts`, find:
 
-```ts
-parentId: t.Optional(t.String()),
+```ts title="Before: request body"
+userId: t.String(),
+approved: t.Boolean(),
 ```
 
-In `web/src/routes/comments/+page.svelte`, add `parentId: ''` to both initial/reset form objects and
-`parentId: record.parentId ?? ''` to `edit`. Add this derived option list beside the User options:
+Change it to:
 
-```ts
+```ts title="After: request body"
+userId: t.String(),
+parentId: t.Optional(t.String()),
+approved: t.Boolean(),
+```
+
+In `web/src/routes/comments/+page.svelte`, make these four focused changes.
+
+```ts title="Before: form state"
+let form = $state({ body: '', postId: '', userId: '', approved: false })
+```
+
+```ts title="After: form state"
+let form = $state({
+  body: '',
+  postId: '',
+  userId: '',
+  parentId: '',
+  approved: false,
+})
+```
+
+Find the User option state:
+
+```ts title="Before: option state"
+let userItems = $derived(
+  userOptions.map((option) => ({ id: option.id, label: label(option) })),
+)
+```
+
+Change it to:
+
+```ts title="After: option state"
+let userItems = $derived(
+  userOptions.map((option) => ({ id: option.id, label: label(option) })),
+)
 let parentItems = $derived(
   records
     .filter((record) => record.id !== editing)
@@ -117,10 +177,74 @@ let parentItems = $derived(
 )
 ```
 
-At the start of `save`, create `const values = { ...form, parentId: form.parentId || undefined }` and
-send `values` instead of `form`. Add this control after the User picker:
+Replace the complete generated `save` function:
 
-```svelte
+```ts title="Before: save"
+async function save(event: SubmitEvent) {
+  event.preventDefault()
+  const result =
+    editing === null
+      ? await api.comments.post(form)
+      : await api.comments({ id: editing }).patch(form)
+  if (result.error || !result.data)
+    message = errorMessage(result.error, 'Could not save comment')
+  else {
+    cancel()
+    await load()
+  }
+}
+```
+
+```ts title="After: save"
+async function save(event: SubmitEvent) {
+  event.preventDefault()
+  const values = { ...form, parentId: form.parentId || undefined }
+  const result =
+    editing === null
+      ? await api.comments.post(values)
+      : await api.comments({ id: editing }).patch(values)
+  if (result.error || !result.data)
+    message = errorMessage(result.error, 'Could not save comment')
+  else {
+    cancel()
+    await load()
+  }
+}
+```
+
+In `edit`, change this focused section:
+
+```ts title="Before: edit"
+userId: record.userId,
+approved: record.approved,
+```
+
+Then update the reset inside `cancel`:
+
+```ts title="Before: cancel"
+form = { body: '', postId: '', userId: '', approved: false }
+```
+
+```ts title="After: cancel"
+form = { body: '', postId: '', userId: '', parentId: '', approved: false }
+```
+
+```ts title="After: edit"
+userId: record.userId,
+parentId: record.parentId ?? '',
+approved: record.approved,
+```
+
+Finally, find the generated User picker:
+
+```svelte title="Before: form controls"
+<RelationshipCombobox label="User" items={userItems} bind:value={form.userId} oncreate={createUser} />
+```
+
+Change it to:
+
+```svelte title="After: form controls"
+<RelationshipCombobox label="User" items={userItems} bind:value={form.userId} oncreate={createUser} />
 <RelationshipCombobox
   label="Parent comment (optional)"
   items={parentItems}
@@ -132,16 +256,35 @@ The Comments CRUD can now create a root comment or select any existing Comment a
 
 ## Seed the publishing tables
 
-Run these in order and replace each `PASTE_*_ID` with the `id` returned earlier. These commands seed
-every ordinary publishing table; the fifth command attaches the Tag through the polymorphic join:
+Copy and paste the complete block for your shell. Both versions capture every returned ID, create a
+Post, attach its Tag, then create a root Comment and a nested reply without placeholders.
+
+### macOS, Linux, Git Bash, or WSL
 
 ```sh
-curl -X POST http://localhost:3000/users -H "content-type: application/json" -d '{"name":"Ada Lovelace","email":"ada@example.test","bio":"Bunway author"}'
-curl -X POST http://localhost:3000/tags -H "content-type: application/json" -d '{"name":"Bun"}'
-curl -X POST http://localhost:3000/posts -H "content-type: application/json" -d '{"title":"Welcome to Bunway","slug":"welcome-to-bunway","excerpt":"A fast first post","body":"Built with Bun, Elysia, Drizzle, and SvelteKit.","userId":"PASTE_USER_ID","published":true,"publishedAt":"2026-08-21T12:00:00.000Z"}'
-curl -X POST http://localhost:3000/comments -H "content-type: application/json" -d '{"body":"This looks exciting.","postId":"PASTE_POST_ID","userId":"PASTE_USER_ID","approved":true}'
-curl -X PUT http://localhost:3000/posts/PASTE_POST_ID/tags -H "content-type: application/json" -d '{"ids":["PASTE_TAG_ID"]}'
-curl -X POST http://localhost:3000/comments -H "content-type: application/json" -d '{"body":"A nested reply from curl.","postId":"PASTE_POST_ID","userId":"PASTE_USER_ID","parentId":"PASTE_ROOT_COMMENT_ID","approved":true}'
+set -e
+USER_ID=$(curl --silent --fail-with-body --request POST http://localhost:3000/users --header 'content-type: application/json' --data-raw '{"name":"Grace Hopper","email":"grace@example.test","bio":"Bunway author"}' | bun -e 'console.log(JSON.parse(await Bun.stdin.text()).id)')
+TAG_ID=$(curl --silent --fail-with-body --request POST http://localhost:3000/tags --header 'content-type: application/json' --data-raw '{"name":"Bun"}' | bun -e 'console.log(JSON.parse(await Bun.stdin.text()).id)')
+POST_ID=$(curl --silent --fail-with-body --request POST http://localhost:3000/posts --header 'content-type: application/json' --data-raw "{\"title\":\"Welcome to Bunway\",\"slug\":\"welcome-to-bunway-bash\",\"excerpt\":\"A fast first post\",\"body\":\"Built with Bun, Elysia, Drizzle, and SvelteKit.\",\"userId\":\"$USER_ID\",\"published\":true,\"publishedAt\":\"2026-08-21T12:00:00.000Z\"}" | bun -e 'console.log(JSON.parse(await Bun.stdin.text()).id)')
+curl --silent --fail-with-body --request PUT "http://localhost:3000/posts/$POST_ID/tags" --header 'content-type: application/json' --data-raw "{\"ids\":[\"$TAG_ID\"]}"
+ROOT_COMMENT_ID=$(curl --silent --fail-with-body --request POST http://localhost:3000/comments --header 'content-type: application/json' --data-raw "{\"body\":\"This looks exciting.\",\"postId\":\"$POST_ID\",\"userId\":\"$USER_ID\",\"approved\":true}" | bun -e 'console.log(JSON.parse(await Bun.stdin.text()).id)')
+curl --silent --fail-with-body --request POST http://localhost:3000/comments --header 'content-type: application/json' --data-raw "{\"body\":\"A nested reply from curl.\",\"postId\":\"$POST_ID\",\"userId\":\"$USER_ID\",\"parentId\":\"$ROOT_COMMENT_ID\",\"approved\":true}"
+```
+
+### Windows PowerShell
+
+```powershell
+$ErrorActionPreference = "Stop"
+$user = (curl.exe --silent --fail-with-body --request POST http://localhost:3000/users --header "content-type: application/json" --data-raw '{"name":"Ada Lovelace","email":"ada@example.test","bio":"Bunway author"}') | ConvertFrom-Json
+$tag = (curl.exe --silent --fail-with-body --request POST http://localhost:3000/tags --header "content-type: application/json" --data-raw '{"name":"Bun"}') | ConvertFrom-Json
+$postBody = @{ title = "Welcome to Bunway"; slug = "welcome-to-bunway"; excerpt = "A fast first post"; body = "Built with Bun, Elysia, Drizzle, and SvelteKit."; userId = $user.id; published = $true; publishedAt = "2026-08-21T12:00:00.000Z" } | ConvertTo-Json -Compress
+$post = (curl.exe --silent --fail-with-body --request POST http://localhost:3000/posts --header "content-type: application/json" --data-raw $postBody) | ConvertFrom-Json
+$tagBody = @{ ids = @($tag.id) } | ConvertTo-Json -Compress
+curl.exe --silent --fail-with-body --request PUT "http://localhost:3000/posts/$($post.id)/tags" --header "content-type: application/json" --data-raw $tagBody
+$commentBody = @{ body = "This looks exciting."; postId = $post.id; userId = $user.id; approved = $true } | ConvertTo-Json -Compress
+$rootComment = (curl.exe --silent --fail-with-body --request POST http://localhost:3000/comments --header "content-type: application/json" --data-raw $commentBody) | ConvertFrom-Json
+$replyBody = @{ body = "A nested reply from curl."; postId = $post.id; userId = $user.id; parentId = $rootComment.id; approved = $true } | ConvertTo-Json -Compress
+curl.exe --silent --fail-with-body --request POST http://localhost:3000/comments --header "content-type: application/json" --data-raw $replyBody
 ```
 
 ## 3. Create the Blog API
@@ -217,20 +360,28 @@ export const blogRoutes = new Elysia({ prefix: '/blog' }).get('/', async () => {
 })
 ```
 
-In `src/routes/index.ts`, add the import and `.use(...)` before their marker comments:
+In `src/routes/index.ts`, insert this line immediately before `// bunway:imports`:
 
 ```ts
 import { blogRoutes } from './blog'
 ```
 
+Then insert this line immediately before `// bunway:routes`:
+
 ```ts
 .use(blogRoutes)
 ```
 
-Restart the server and test the API:
+Restart the server and test the API on macOS/Linux:
 
 ```sh
 curl http://localhost:3000/blog
+```
+
+On Windows PowerShell:
+
+```powershell
+curl.exe http://localhost:3000/blog
 ```
 
 An empty `[]` is correct until a published Post exists.
@@ -415,7 +566,7 @@ Create `web/src/routes/blog/+page.svelte` (create the `blog/` directory first):
 
 ## 6. Add navigation and verify
 
-Insert this immediately before `// bunway:resources` in `web/src/lib/resources.ts`:
+In `web/src/lib/resources.ts`, insert this entry immediately before `// bunway:resources`:
 
 ```ts
 { label: 'Blog Showcase', href: '/blog', icon: 'article' },
@@ -424,4 +575,4 @@ Insert this immediately before `// bunway:resources` in `web/src/lib/resources.t
 Restart `bunway dev`, open `http://localhost:5173/blog`, and confirm the sidebar link appears. If the
 page is empty, open `/posts`, create a Post with `published` enabled, and reload.
 
-Next: [add Jobs and Realtime](./04-jobs-realtime.md).
+Next: [add Mail and SMS](./06-audit-messaging.md).

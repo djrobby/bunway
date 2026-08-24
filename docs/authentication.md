@@ -44,7 +44,7 @@ The API mounts Better Auth at `/api/auth/*`. The generated Elysia macro makes pr
 ```ts
 new Elysia()
   .use(authPlugin)
-  .get("/account", ({ user, session }) => ({ user, session }), { auth: true });
+  .get('/account', ({ user, session }) => ({ user, session }), { auth: true })
 ```
 
 ## OAuth
@@ -84,7 +84,7 @@ Do not also run Better Auth migrations. When upgrading Better Auth or changing p
 
 ## Test application
 
-The maintained `bunway-test-app` enables password, magic link, Google/GitHub/Microsoft/Apple OAuth, TOTP, backup codes, email OTP, trusted devices, and passkeys. Its seed creates these local credential accounts:
+The [finished Showcase](./showcase/index.md) enables password, magic link, Google/GitHub/Microsoft/Apple OAuth, TOTP, backup codes, email OTP, trusted devices, and passkeys. Its seed creates these local credential accounts:
 
 ```text
 demo@example.com      / BunwayDemo123!

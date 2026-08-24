@@ -4,7 +4,7 @@ title: 2. Build Category and Product CRUD
 
 # 2. Build Category and Product CRUD
 
-Generate Category first because Product references it. This is also where the maintained test app adds
+Generate Category first because Product references it. This is also where the [finished Showcase](./index.md) adds
 its Product attachment; there is no extra resource introduced later.
 
 ```sh
@@ -18,12 +18,27 @@ The generators create both schemas, routes, Bun smoke tests, SvelteKit list/deta
 registrations, and Categories/Products sidebar entries. Product's relationship is an indexed Drizzle
 foreign key. Its image uses the storage schemas rather than a `products` column.
 
-Seed both tables from another terminal. Copy the Category `id` from the first response into the second
-command (use `curl.exe` instead of `curl` in Windows PowerShell):
+Seed both tables by copying the complete block for your shell. Each version captures the Category ID
+and uses it in the Product request automatically.
+
+### macOS, Linux, Git Bash, or WSL
+
+Bun extracts the returned ID, so no additional JSON utility is required:
 
 ```sh
-curl -X POST http://localhost:3000/categories -H "content-type: application/json" -d '{"name":"Hardware"}'
-curl -X POST http://localhost:3000/products -H "content-type: application/json" -d '{"name":"Mechanical Keyboard","price":"129.99","active":true,"categoryId":"PASTE_CATEGORY_ID"}'
+set -e
+CATEGORY_ID=$(curl --silent --fail-with-body --request POST http://localhost:3000/categories --header 'content-type: application/json' --data-raw '{"name":"Hardware"}' | bun -e 'console.log(JSON.parse(await Bun.stdin.text()).id)')
+curl --silent --fail-with-body --request POST http://localhost:3000/products --header 'content-type: application/json' --data-raw "{\"name\":\"Mechanical Keyboard\",\"price\":\"129.99\",\"active\":true,\"categoryId\":\"$CATEGORY_ID\"}"
+```
+
+### Windows PowerShell
+
+```powershell
+$ErrorActionPreference = "Stop"
+$categoryJson = curl.exe --silent --fail-with-body --request POST http://localhost:3000/categories --header "content-type: application/json" --data-raw '{"name":"Hardware"}'
+$category = $categoryJson | ConvertFrom-Json
+$productBody = @{ name = "Mechanical Keyboard"; price = "129.99"; active = $true; categoryId = $category.id } | ConvertTo-Json -Compress
+curl.exe --silent --fail-with-body --request POST http://localhost:3000/products --header "content-type: application/json" --data-raw $productBody
 ```
 
 :::tip Verify it

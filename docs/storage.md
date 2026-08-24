@@ -49,20 +49,41 @@ STORAGE_SERVICE=local
 STORAGE_PUBLIC_URL=http://localhost:3000/storage
 ```
 
-## S3 and R2
+## Amazon S3
+
+Create an S3 bucket and an IAM access key allowed to read, write, and delete objects in that bucket.
+For a bucket named `my-bunway-files` in `us-east-1`, configure:
 
 ```env
 STORAGE_SERVICE=s3
-STORAGE_BUCKET=my-bucket
+STORAGE_BUCKET=my-bunway-files
+STORAGE_REGION=us-east-1
+STORAGE_ACCESS_KEY_ID=AKIA_REPLACE_ME
+STORAGE_SECRET_ACCESS_KEY=replace-me
+STORAGE_PUBLIC_URL=https://my-bunway-files.s3.us-east-1.amazonaws.com
+```
+
+Do not set `STORAGE_ENDPOINT` for AWS S3. If the bucket is private, `STORAGE_PUBLIC_URL` must point to
+the CDN or application URL that is allowed to serve those objects.
+
+## Cloudflare R2
+
+In Cloudflare, create an R2 bucket, create an R2 API token with object read/write permission, and copy
+the account ID, access-key ID, and secret. For a bucket named `my-bunway-files`, configure:
+
+```env
+STORAGE_SERVICE=s3
+STORAGE_BUCKET=my-bunway-files
 STORAGE_REGION=auto
-STORAGE_ENDPOINT=https://ACCOUNT.r2.cloudflarestorage.com
-STORAGE_ACCESS_KEY_ID=...
-STORAGE_SECRET_ACCESS_KEY=...
+STORAGE_ENDPOINT=https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+STORAGE_ACCESS_KEY_ID=replace-with-r2-access-key-id
+STORAGE_SECRET_ACCESS_KEY=replace-with-r2-secret-access-key
 STORAGE_PUBLIC_URL=https://files.example.com
 ```
 
-The S3-compatible adapter uses Bun's native S3 support. The attachment API is independent of the
-adapter, leaving room for future presigned direct uploads without changing model-facing code.
+`STORAGE_PUBLIC_URL` is the R2 custom domain or public development URL configured for the bucket; it is
+not the S3 API endpoint. Both setups use Bun's native S3-compatible client. The attachment API remains
+the same for local storage, S3, and R2.
 
 Scaffold tables show attachment counts in a dedicated badge. Clicking opens previews and removal
 controls; a steady filled badge uses fading outward rings to indicate attached files.

@@ -1,8 +1,8 @@
 ---
-title: 7. Test, build, and deploy
+title: 8. Test, build, and deploy
 ---
 
-# 7. Test, build, and deploy
+# 8. Test, build, and deploy
 
 ## 1. Add repeatable showcase data
 
@@ -35,24 +35,25 @@ await db.insert(products).values({
 })
 
 await db.insert(users).values({
-    id: ids.author,
-    name: 'Bunway Author',
-    email: `author-${crypto.randomUUID()}@example.test`,
-    bio: 'Writes about building direct, Bun-native applications.',
-  })
+  id: ids.author,
+  name: 'Bunway Author',
+  email: `author-${crypto.randomUUID()}@example.test`,
+  bio: 'Writes about building direct, Bun-native applications.',
+})
 
 await db.insert(tags).values({ id: ids.tag, name: 'Bun' })
 
 await db.insert(posts).values({
-    id: ids.post,
-    title: 'Building with Bunway',
-    slug: `building-with-bunway-${crypto.randomUUID()}`,
-    excerpt: 'A generated application remains ordinary Bun, Elysia, Drizzle, and SvelteKit.',
-    body: 'Bunway supplies conventions and readable source code without hiding the underlying stack.',
-    userId: ids.author,
-    published: true,
-    publishedAt: new Date().toISOString(),
-  })
+  id: ids.post,
+  title: 'Building with Bunway',
+  slug: `building-with-bunway-${crypto.randomUUID()}`,
+  excerpt:
+    'A generated application remains ordinary Bun, Elysia, Drizzle, and SvelteKit.',
+  body: 'Bunway supplies conventions and readable source code without hiding the underlying stack.',
+  userId: ids.author,
+  published: true,
+  publishedAt: new Date().toISOString(),
+})
 
 await db.insert(postTaggings).values({
   tagId: ids.tag,
@@ -61,12 +62,12 @@ await db.insert(postTaggings).values({
 })
 
 await db.insert(comments).values({
-    id: ids.rootComment,
-    body: 'The generated source is easy to follow.',
-    postId: ids.post,
-    userId: ids.author,
-    approved: true,
-  })
+  id: ids.rootComment,
+  body: 'The generated source is easy to follow.',
+  postId: ids.post,
+  userId: ids.author,
+  approved: true,
+})
 
 await db.insert(comments).values({
   body: 'And nested discussions are still ordinary relational data.',
@@ -80,9 +81,16 @@ await db.insert(comments).values({
 console.log('Showcase seed complete')
 ```
 
-Add this script to the root `package.json` `scripts` object:
+In the root `package.json`, find the end of `scripts`:
 
-```json
+```json title="Before"
+"typecheck": "bunx --bun tsc --noEmit && bun run --bun --cwd web check"
+```
+
+Add a comma to that existing line and place the seed script below it:
+
+```json title="After"
+"typecheck": "bunx --bun tsc --noEmit && bun run --bun --cwd web check",
 "db:seed": "bun src/db/seed.ts"
 ```
 
@@ -144,7 +152,7 @@ the [production checklist](../production-checklist.md).
 
 ## Parity checklist
 
-The maintained test app and this guide share these visible destinations:
+The [finished Showcase](./index.md) contains these visible destinations:
 
 - `/categories` and `/products` for the core relationship/attachment example
 - `/users`, `/tags`, `/posts`, and `/comments` for the publishing model

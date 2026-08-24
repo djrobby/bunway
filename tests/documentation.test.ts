@@ -13,6 +13,10 @@ test('documentation targets the Bunway GitHub Pages project site', async () => {
   expect(config).toContain("baseUrl: '/bunway/'")
   expect(config).toContain('https://github.com/djrobby/bunway')
   expect(config).toContain('return { cache: false }')
+  expect(config).toContain(
+    "require.resolve('@easyops-cn/docusaurus-search-local')",
+  )
+  expect(config).toContain('indexDocs: true')
   expect(workflow).toContain('branches: [master]')
   expect(workflow).toContain('path: build')
   expect(workflow).toContain('actions/deploy-pages@v4')
@@ -25,8 +29,11 @@ test('request lifecycle sits between first app and project structure and covers 
   ).text()
   const firstApp = await Bun.file(join(root, 'docs/first-app.md')).text()
 
-  expect(sidebar).toContain(
-    '"first-app", "request-lifecycle", "project-structure"',
+  expect(sidebar.indexOf('first-app')).toBeLessThan(
+    sidebar.indexOf('request-lifecycle'),
+  )
+  expect(sidebar.indexOf('request-lifecycle')).toBeLessThan(
+    sidebar.indexOf('project-structure'),
   )
   for (const concept of [
     'SvelteKit/Vite :5173',
@@ -44,7 +51,15 @@ test('request lifecycle sits between first app and project structure and covers 
   expect(firstApp).toContain('./request-lifecycle.md')
 })
 
-test('showcase guide stays aligned with the maintained test application', async () => {
+test('file storage documents AWS S3 and Cloudflare R2 independently', async () => {
+  const storage = await Bun.file(join(root, 'docs/storage.md')).text()
+  expect(storage).toContain('## Amazon S3')
+  expect(storage).toContain('Do not set `STORAGE_ENDPOINT` for AWS S3')
+  expect(storage).toContain('## Cloudflare R2')
+  expect(storage).toContain('YOUR_ACCOUNT_ID.r2.cloudflarestorage.com')
+})
+
+test('showcase guide stays aligned with the finished Showcase application', async () => {
   const showcaseFiles = [
     'index.md',
     '01-create.md',
@@ -53,6 +68,7 @@ test('showcase guide stays aligned with the maintained test application', async 
     '04-jobs-realtime.md',
     '05-auth.md',
     '06-audit-messaging.md',
+    '06-audit.md',
     '07-test-deploy.md',
   ]
   const showcase = (
@@ -112,7 +128,10 @@ test('showcase guide stays aligned with the maintained test application', async 
     "import { postTaggings } from '../db/schema/post-taggings'",
   )
   expect(showcase).toContain("export { postTaggings } from './post-taggings'")
-  expect(showcase).toContain('Do not substitute `postsToTags`')
+  expect(showcase).not.toContain(
+    'Continuing a showcase created from the earlier tutorial?',
+  )
+  expect(showcase).not.toContain('PASTE_')
   expect(showcase).not.toContain('$lib/date-time.svelte.js')
   expect(showcase).toContain(
     "import { realtimeShowcaseRoutes } from './realtime'",
@@ -138,4 +157,21 @@ test('showcase guide stays aligned with the maintained test application', async 
   expect(showcase).toContain(
     'onreply={(parentId, body) => reply(post.id, parentId, body)}',
   )
+  expect(showcase).toContain('title="Before:')
+  expect(showcase).toContain('title="After:')
+  for (const markerOnlyTitle of [
+    'title="Before: route import"',
+    'title="Before: imports"',
+    'title="Before: navigation"',
+  ])
+    expect(showcase).not.toContain(markerOnlyTitle)
+  for (const file of showcaseFiles) {
+    const source = await Bun.file(join(root, 'docs/showcase', file)).text()
+    if (source.includes('\ncurl ')) expect(source).toContain('curl.exe')
+  }
+  const sidebar = await Bun.file(join(root, 'sidebars.ts')).text()
+  expect(sidebar.indexOf('showcase/audit-messaging')).toBeLessThan(
+    sidebar.indexOf('showcase/jobs-realtime'),
+  )
+  expect(sidebar).toContain('showcase/audit')
 })

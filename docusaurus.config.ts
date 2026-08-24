@@ -3,12 +3,23 @@ import type { Options, ThemeConfig } from '@docusaurus/preset-classic'
 
 const config: Config = {
   title: 'Bunway',
-  tagline: 'Rails-inspired productivity for Bun, Elysia, Drizzle, and SvelteKit',
+  tagline:
+    'Rails-inspired productivity for Bun, Elysia, Drizzle, and SvelteKit',
   favicon: 'img/favicon.svg',
   url: 'https://djrobby.github.io',
   baseUrl: '/bunway/',
   onBrokenLinks: 'throw',
   plugins: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,
+        indexDocs: true,
+        indexBlog: false,
+        indexPages: false,
+        docsRouteBasePath: '/',
+      },
+    ],
     () => ({
       name: 'bunway-bun-webpack-config',
       configureWebpack() {
@@ -21,7 +32,11 @@ const config: Config = {
     [
       'classic',
       {
-        docs: { routeBasePath: '/', sidebarPath: './sidebars.ts', editUrl: undefined },
+        docs: {
+          routeBasePath: '/',
+          sidebarPath: './sidebars.ts',
+          editUrl: undefined,
+        },
         blog: false,
         theme: { customCss: './src/css/custom.css' },
       } satisfies Options,
@@ -34,15 +49,37 @@ const config: Config = {
       items: [
         { to: '/', label: 'Docs', position: 'left' },
         { to: '/showcase', label: 'Showcase', position: 'left' },
-        { href: 'https://github.com/djrobby/bunway', label: 'GitHub', position: 'right' },
+        {
+          href: 'https://github.com/djrobby/bunway',
+          label: 'GitHub',
+          position: 'right',
+        },
       ],
     },
     footer: {
       style: 'dark',
       links: [
-        { title: 'Learn', items: [{ label: 'Getting started', to: '/getting-started' }, { label: 'Build the Showcase', to: '/showcase' }] },
-        { title: 'Reference', items: [{ label: 'CLI', to: '/cli' }, { label: 'Configuration', to: '/configuration' }] },
-        { title: 'Project', items: [{ label: 'Architecture', to: '/architecture' }, { label: 'Roadmap', to: '/roadmap' }] },
+        {
+          title: 'Learn',
+          items: [
+            { label: 'Getting started', to: '/getting-started' },
+            { label: 'Build the Showcase', to: '/showcase' },
+          ],
+        },
+        {
+          title: 'Reference',
+          items: [
+            { label: 'CLI', to: '/cli' },
+            { label: 'Configuration', to: '/configuration' },
+          ],
+        },
+        {
+          title: 'Project',
+          items: [
+            { label: 'Architecture', to: '/architecture' },
+            { label: 'Roadmap', to: '/roadmap' },
+          ],
+        },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Bunway contributors.`,
     },
