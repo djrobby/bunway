@@ -1,6 +1,6 @@
 {
   "name": "create-bunway",
-  "version": "0.1.0-preview.9",
+  "version": "0.1.0-preview.10",
   "description": "Create a Bunway application with Bun, Elysia, Drizzle, PostgreSQL, Eden Treaty, and SvelteKit.",
   "keywords": [
     "bun",
