@@ -149,12 +149,12 @@ Real-world developer feedback should determine later development.
 
 ## v0.1 Scope
 
-Prioritize:
+The v0.1 developer preview ships:
 
 1. Project creation
 2. Development server
 3. Elysia API
-4. PostgreSQL
+4. PostgreSQL (default) plus MySQL and SQLite support
 5. Drizzle
 6. Drizzle Kit migrations
 7. Eden Treaty
@@ -163,12 +163,14 @@ Prioritize:
 10. Tailwind CSS
 11. shadcn-svelte
 12. Model generator
-13. CRUD resource generator
-14. PostgreSQL-backed jobs
+13. CRUD resource and full scaffold generators
+14. Jobs backed by PostgreSQL, falling back to an in-memory driver when no database is configured
 15. Worker
-16. Route listing
-17. Minimal smoke tests
-18. Concise documentation
+16. Realtime (SSE and WebSocket channels)
+17. Audit, Mail/SMS messaging, Storage attachments, and generated Better Auth integration
+18. Route listing
+19. Minimal smoke tests
+20. Concise documentation
 
 Defer unless required:
 
@@ -181,14 +183,12 @@ Defer unless required:
 * custom ORM
 * custom RPC
 * custom validation framework
-* custom authentication framework
+* Bunway-built authentication primitives (generated Better Auth application code is the shipped approach)
 * admin UI
 * job dashboard
-* frontend CRUD scaffolding
 * plugin marketplace
-* multiple database support
 * elaborate caching
-* elaborate realtime abstractions
+* multi-process realtime
 * deployment platform
 * complex configuration system
 
@@ -211,7 +211,7 @@ small realtime helpers
 
 Do not assume all of these need to exist.
 
-Jobs are the primary runtime feature for v0.1.
+All shipped runtime features (jobs, messaging, storage, audit, realtime) are first-class; none outranks the others.
 
 Most Bunway value should come from:
 
@@ -567,6 +567,10 @@ Do not require Redis.
 
 Do not require external queue infrastructure.
 
+Jobs must work without a database. When no jobs database is configured, an in-memory driver runs the
+same job API; it is process-local and non-durable by design, and the active driver must be visible
+(never silently chosen). PostgreSQL remains the durable default for production.
+
 The queue should support the minimum required functionality:
 
 * enqueue
@@ -749,13 +753,12 @@ Storage should not block v0.1.
 
 ## Authentication
 
-Do not build Bunway authentication from scratch for v0.1.
+Do not build Bunway authentication primitives from scratch.
 
 Authentication should remain optional.
 
-Better Auth may be evaluated as the preferred integration.
-
-Do not let authentication delay the initial developer preview.
+Generated Better Auth application code is the shipped integration; keep it ordinary Better Auth plus
+ordinary Elysia and SvelteKit code, not a Bunway auth framework.
 
 ---
 

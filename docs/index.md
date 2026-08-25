@@ -31,7 +31,7 @@ responsive CRUD interface, filtering, sorting, pagination, configurable columns,
 - PostgreSQL and Drizzle Kit conventions without a second persistence layer.
 - Searchable relationship controls for one-to-one, one-to-many, many-to-many, and explicit polymorphic associations.
 - Local and S3-compatible file storage backed by Drizzle attachment metadata.
-- PostgreSQL-backed background jobs and concurrent workers.
+- PostgreSQL-backed background jobs and concurrent workers, with an in-memory driver when no database is configured.
 - SvelteKit CRUD pages composed from source-installed shadcn-svelte components.
 
 ## Why Bunway instead of assembling the stack yourself?

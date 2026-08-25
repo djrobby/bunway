@@ -1,5 +1,8 @@
 export { job } from './job'
-export { defineDatabases } from './database'
+export {
+  databaseEnvVariable,
+  defineDatabases,
+} from './database'
 export type { DatabaseAdapter, DatabaseConnection } from './database'
 export { migrateJobs, work, workOnce } from './worker'
 export type { Job, JobOptions, WorkerOptions } from './types'

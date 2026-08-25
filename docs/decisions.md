@@ -23,9 +23,15 @@ a separate documented generator pattern and must not be substituted into the Blo
 make an app created from an obsolete tutorial appear compatible. Preview showcase apps are disposable;
 the guide tells affected users to regenerate the demo so its schema matches the lesson.
 
-## Jobs are the only v0.1 runtime abstraction
+## Jobs are driver-based with no database requirement
 
-The CLI generates ordinary application code. `@bunway/core` exists only for the PostgreSQL queue, where Bun, Elysia, and Drizzle do not provide a job API.
+The CLI generates ordinary application code; `@bunway/core` provides only the small runtime pieces Bun,
+Elysia, and Drizzle do not: the job queue plus thin messaging, storage-attachment, audit, and realtime
+helpers. Jobs run through one of two interchangeable drivers behind the same `job()` API:
+PostgreSQL-backed queueing when a jobs database is configured (durable default), or an in-memory
+driver when none is (development and database-free projects). The active driver is always announced;
+it is never silently chosen. The in-memory driver is process-local and non-durable by design —
+mirroring the Realtime decision — and production deployments should configure PostgreSQL jobs.
 
 ## Realtime is process-local and transport-specific
 

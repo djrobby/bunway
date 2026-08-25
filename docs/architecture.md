@@ -55,8 +55,9 @@ migrations directories; additional SQL databases have their own directories and 
 PostgreSQL uses Drizzle over Bun.SQL, MySQL uses mysql2, and SQLite uses `bun:sqlite`. Relationships
 never cross databases.
 
-Jobs choose a named PostgreSQL database through `BUNWAY_JOBS_DATABASE`. Auth and Audit import their
-selected database explicitly. Bunway does not fake cross-database transactions.
+Jobs choose a named PostgreSQL database through `BUNWAY_JOBS_DATABASE` and fall back to an announced
+in-memory driver when none is configured. Auth and Audit import their selected database explicitly.
+Bunway does not fake cross-database transactions.
 
 ## Generated code
 

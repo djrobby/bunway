@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { mkdir, rm } from 'node:fs/promises'
-import type { DatabaseAdapter, DatabaseConnection } from '@bunway/core'
+import { databaseEnvVariable, type DatabaseAdapter, type DatabaseConnection } from '@bunway/core'
 import { CliError, insertBefore, run } from './utils'
 
 export type DatabaseName = string
@@ -25,7 +25,7 @@ export async function database(name = 'primary', cwd = process.cwd()) {
 }
 
 export const databaseDirectory = (name: string) => name === 'primary' ? join('src', 'db') : join('src', 'db', name)
-export const databaseEnv = (name: string) => name === 'primary' ? 'DATABASE_URL' : `${name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase()}_DATABASE_URL`
+export const databaseEnv = (name: string) => databaseEnvVariable(name)
 export const drizzleConfig = (name: string) => name === 'primary' ? 'drizzle.config.ts' : `drizzle.${name}.config.ts`
 
 export async function addDatabase(name: string | undefined, adapter: DatabaseAdapter | undefined, cwd = process.cwd()) {

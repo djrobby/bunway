@@ -59,7 +59,7 @@ Everything is intended to be opened, read, and changed.
 - PostgreSQL with Drizzle and Bun.SQL by default
 - validated Elysia APIs with Eden Treaty inference
 - SvelteKit 2, Svelte 5, Tailwind CSS, and shadcn-svelte
-- PostgreSQL-backed jobs without Redis
+- PostgreSQL-backed jobs without Redis, with an in-memory driver when no database is configured
 - optional Realtime, Auth, Audit, Messaging, and Storage generators
 
 Run `bunway help` for the complete command summary or visit the

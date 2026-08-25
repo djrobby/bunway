@@ -16,7 +16,7 @@ after changing `.env`. Empty provider values are not secrets and are safe in `.e
 | Database | `<NAME>_DATABASE_URL` | Required for named PostgreSQL/MySQL databases |
 | Generators | `BUNWAY_ID_TYPE` | `uuid`; alternatives `integer`, `bigint` |
 | Generators | `BUNWAY_ID_ENCODING` | `standard`; alternative `base64url` for UUIDs |
-| Jobs | `BUNWAY_JOBS_DATABASE` | Named PostgreSQL database; `primary` |
+| Jobs | `BUNWAY_JOBS_DATABASE` | Named PostgreSQL database; `primary`. Unset URLs select the in-memory driver |
 | Jobs | `QUEUES` | Comma-separated worker queues; all/default behavior when omitted |
 | Auth | `BETTER_AUTH_SECRET` | Required in production; at least 32 random characters |
 | Auth | `BETTER_AUTH_URL` | API origin; `http://localhost:3000` |

@@ -6,7 +6,7 @@ for Bun without hiding Bun, Elysia, Drizzle, PostgreSQL, or SvelteKit.
 Bunway puts most of its value in conventions and generated application code. `@bunway/core` contains
 only the runtime features that benefit from a shared, focused implementation:
 
-- PostgreSQL-backed jobs and workers
+- PostgreSQL-backed jobs and workers, with an in-memory driver when no database is configured
 - typed SSE and WebSocket channels
 - local and S3-compatible storage
 - mail and SMS delivery primitives
@@ -41,6 +41,9 @@ Run queued work through the Bunway CLI:
 ```sh
 bunway worker
 ```
+
+Jobs use PostgreSQL when a jobs database is configured and an announced in-memory driver otherwise;
+the in-memory driver is process-local and non-durable by design. See the Jobs documentation for details.
 
 The package also exports `@bunway/core/realtime` for Elysia servers and
 `@bunway/core/realtime/browser` for browser clients.

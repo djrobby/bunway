@@ -1,4 +1,4 @@
-import { sql } from "./database";
+import { jobsDriver } from "./queue";
 import { handlers } from "./registry";
 import type { Handler, Job, JobOptions } from "./types";
 import { publishJobProgress } from "./realtime";
@@ -46,13 +46,13 @@ export function job<Payload>(
       }
     },
     async performLater(payload, options: JobOptions = {}) {
-      const [record] = await sql()`
-        INSERT INTO bunway_jobs (queue, name, payload, max_attempts, run_at)
-        VALUES (${options.queue ?? "default"}, ${name}, ${JSON.stringify(payload)}::jsonb,
-          ${options.maxAttempts ?? 3}, ${options.runAt ?? new Date()})
-        RETURNING id
-      `;
-      return BigInt(record.id);
+      return jobsDriver().enqueue({
+        queue: options.queue ?? "default",
+        name,
+        payload: JSON.stringify(payload),
+        maxAttempts: options.maxAttempts ?? 3,
+        runAt: options.runAt ?? new Date(),
+      });
     },
   };
 }

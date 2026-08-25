@@ -1,25 +1,7 @@
-import { extname, join } from "node:path";
-import { mkdir } from "node:fs/promises";
-import { format } from "prettier";
+import { join } from "node:path";
 import { camel, CliError, humanize, insertBefore, kebab } from "./utils";
 import { generateAudit } from "./audit";
-
-async function write(path: string, source: string) {
-  if (await Bun.file(path).exists())
-    throw new CliError(`${path} already exists`);
-  await mkdir(join(path, ".."), { recursive: true });
-  const content =
-    extname(path) === ".ts"
-      ? await format(source, {
-          parser: "typescript",
-          printWidth: 100,
-          semi: false,
-          singleQuote: true,
-        })
-      : source;
-  await Bun.write(path, content);
-  console.log(`create ${path}`);
-}
+import { ensureNew } from "./writing";
 
 function names(raw: string) {
   if (!raw) throw new CliError("A messaging definition name is required");
@@ -63,7 +45,7 @@ export async function ensureMessaging(cwd: string) {
   const auditOption = auditExists
     ? `audit: (event, options) => audit.record(event, options),`
     : "";
-  await write(
+  await ensureNew(
     path,
     `import {
   createMail,
@@ -144,7 +126,7 @@ export async function generateMailer(
   }),`,
     )
     .join("\n");
-  await write(
+  await ensureNew(
     join(cwd, `src/mailers/${value.file}.ts`),
     `import { mailer } from '../messaging'
 
@@ -173,7 +155,7 @@ export async function generateSms(
   }),`,
     )
     .join("\n");
-  await write(
+  await ensureNew(
     join(cwd, `src/sms/${value.file}.ts`),
     `import { sms } from '../messaging'
 

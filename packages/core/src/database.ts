@@ -10,11 +10,22 @@ export function defineDatabases<const T extends Record<string, DatabaseConnectio
   return databases
 }
 
-export function sql() {
+export function databaseEnvVariable(name: string) {
+  return name === 'primary'
+    ? 'DATABASE_URL'
+    : `${name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase()}_DATABASE_URL`
+}
+
+export function jobsDatabaseUrl() {
   const name = Bun.env.BUNWAY_JOBS_DATABASE ?? 'primary'
-  const variable = name === 'primary' ? 'DATABASE_URL' : `${name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toUpperCase()}_DATABASE_URL`
-  const url = Bun.env[variable]
+  const variable = databaseEnvVariable(name)
+  return { name, variable, url: Bun.env[variable] }
+}
+
+export function sql() {
+  const { name, variable, url } = jobsDatabaseUrl()
   if (!url) throw new Error(`${variable} is required to use Bunway jobs with database "${name}"`)
-  if (!/^postgres(?:ql)?:\/\//.test(url)) throw new Error(`Bunway jobs require PostgreSQL; ${variable} is not a PostgreSQL URL`)
+  if (!/^postgres(?:ql)?:\/\//.test(url))
+    throw new Error(`Bunway jobs require PostgreSQL; ${variable} is not a PostgreSQL URL`)
   return client ??= new Bun.SQL(url)
 }

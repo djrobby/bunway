@@ -22,8 +22,10 @@ reviewing it, or edit the existing source manually.
 
 ## Worker does not process jobs
 
-Run migrations so `bunway_jobs` exists, import every definition from `src/jobs/index.ts`, and verify
-`BUNWAY_JOBS_DATABASE` selects PostgreSQL. If `QUEUES` is set, it must include the enqueued queue.
+Check the startup banner for the active driver. `postgres` requires migrations so `bunway_jobs` exists;
+`memory` means no jobs database URL was found, so enqueued work only exists inside that one process.
+Import every definition from `src/jobs/index.ts`, and verify `BUNWAY_JOBS_DATABASE` selects the
+intended database. If `QUEUES` is set, it must include the enqueued queue.
 
 ## SSE is connected but does not update
 

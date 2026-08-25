@@ -1,24 +1,13 @@
-import { extname, join } from 'node:path'
-import { mkdir } from 'node:fs/promises'
-import { format } from 'prettier'
+import { join } from 'node:path'
 import { database, databaseDirectory } from './databases'
 import { primaryIdColumnFor, type IdEncoding, type IdType } from './fields'
 import { CliError, insertBefore } from './utils'
+import { ensureNew } from './writing'
 
 export type AuditOptions = {
   database?: string
   idType?: IdType
   idEncoding?: IdEncoding
-}
-
-async function write(path: string, source: string) {
-  if (await Bun.file(path).exists()) throw new CliError(`${path} already exists`)
-  await mkdir(join(path, '..'), { recursive: true })
-  const content = extname(path) === '.ts'
-    ? await format(source, { parser: 'typescript', printWidth: 100, semi: false, singleQuote: true })
-    : source
-  await Bun.write(path, content)
-  console.log(`create ${path}`)
 }
 
 function schemaSource(adapter: 'postgres' | 'mysql' | 'sqlite', idType: IdType, idEncoding: IdEncoding) {
@@ -161,9 +150,9 @@ export async function generateAudit(options: AuditOptions = {}, cwd = process.cw
   if (selected.adapter === 'sqlite' && idType === 'bigint')
     throw new CliError('SQLite uses its INTEGER primary key for integer and bigint IDs; choose uuid or integer')
   const schemaRoot = join(cwd, databaseDirectory(databaseName), 'schema')
-  await write(join(schemaRoot, 'audit-logs.ts'), schemaSource(selected.adapter, idType, idEncoding))
+  await ensureNew(join(schemaRoot, 'audit-logs.ts'), schemaSource(selected.adapter, idType, idEncoding))
   await insertBefore(join(schemaRoot, 'index.ts'), '// bunway:schemas', `export { auditLogs } from './audit-logs'`)
-  await write(join(cwd, 'src/audit/sanitize.ts'), sanitizerSource)
-  await write(join(cwd, 'src/audit/index.ts'), auditSource(databaseName, idType, idEncoding))
+  await ensureNew(join(cwd, 'src/audit/sanitize.ts'), sanitizerSource)
+  await ensureNew(join(cwd, 'src/audit/index.ts'), auditSource(databaseName, idType, idEncoding))
   console.log(`\nAudit generated for database "${databaseName}". Run bunway db:migrate${databaseName === 'primary' ? '' : ` --database=${databaseName}`}.`)
 }

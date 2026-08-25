@@ -1,11 +1,11 @@
 import { join } from "node:path";
 import { existsSync } from "node:fs";
-import { mkdir } from "node:fs/promises";
 import { format } from "prettier";
 import * as sveltePlugin from "prettier-plugin-svelte";
 import { database, databaseDirectory } from "./databases";
 import { CliError, insertBefore, run } from "./utils";
 import { ensureMessaging } from "./messaging";
+import { ensureNew } from "./writing";
 
 export const authProviders = [
   "google",
@@ -33,28 +33,6 @@ export type AuthOptions = {
   database?: string;
   apiOnly?: boolean;
 };
-
-async function write(path: string, source: string) {
-  if (await Bun.file(path).exists())
-    throw new CliError(`${path} already exists`);
-  await mkdir(join(path, ".."), { recursive: true });
-  const parser = path.endsWith(".svelte")
-    ? "svelte"
-    : path.endsWith(".ts")
-      ? "typescript"
-      : undefined;
-  const content = parser
-    ? await format(source, {
-        parser,
-        plugins: parser === "svelte" ? [sveltePlugin] : [],
-        printWidth: 100,
-        semi: false,
-        singleQuote: true,
-      })
-    : source;
-  await Bun.write(path, content);
-  console.log(`create ${path}`);
-}
 
 function parseList<T extends string>(
   values: string[],
@@ -470,7 +448,7 @@ export async function generateAuth(raw: AuthOptions, cwd = process.cwd()) {
   const options = normalizeAuthOptions(raw);
   const selected = await database(options.database, cwd);
   const schemaRoot = join(cwd, databaseDirectory(options.database), "schema");
-  await write(
+  await ensureNew(
     join(schemaRoot, "auth.ts"),
     schemaSource(selected.adapter, options),
   );
@@ -479,20 +457,20 @@ export async function generateAuth(raw: AuthOptions, cwd = process.cwd()) {
     "// bunway:schemas",
     `export * from './auth'`,
   );
-  await write(
+  await ensureNew(
     join(cwd, "src/auth/index.ts"),
     authSource(options).replace(
       `provider: '${options.database}'`,
       `provider: '${selected.adapter === "postgres" ? "pg" : selected.adapter}'`,
     ),
   );
-  await write(join(cwd, "src/auth/oauth.ts"), oauthSource);
+  await ensureNew(join(cwd, "src/auth/oauth.ts"), oauthSource);
   if (options.magicLink || options.mfa.includes("email-otp")) {
     await ensureMessaging(cwd);
-    await write(join(cwd, "src/auth/mail.ts"), mailSource);
+    await ensureNew(join(cwd, "src/auth/mail.ts"), mailSource);
   }
-  await write(join(cwd, "src/auth/plugin.ts"), pluginSource);
-  await write(join(cwd, "src/routes/account.ts"), protectedRoute);
+  await ensureNew(join(cwd, "src/auth/plugin.ts"), pluginSource);
+  await ensureNew(join(cwd, "src/routes/account.ts"), protectedRoute);
   await insertBefore(
     join(cwd, "src/routes/index.ts"),
     "// bunway:imports",
@@ -548,22 +526,22 @@ export async function generateAuth(raw: AuthOptions, cwd = process.cwd()) {
       webManifestPath,
       `${JSON.stringify(webManifest, null, 2)}\n`,
     );
-    await write(join(cwd, "web/src/lib/auth-client.ts"), clientSource(options));
-    await write(
+    await ensureNew(join(cwd, "web/src/lib/auth-client.ts"), clientSource(options));
+    await ensureNew(
       join(cwd, "web/src/routes/login/+page.svelte"),
       loginPage(options),
     );
     if (options.password)
-      await write(
+      await ensureNew(
         join(cwd, "web/src/routes/register/+page.svelte"),
         registerPage,
       );
     if (options.mfa.length || options.passkeys)
-      await write(
+      await ensureNew(
         join(cwd, "web/src/routes/account/security/+page.svelte"),
         securityPage(options),
       );
-    await write(join(cwd, "web/src/routes/account/+page.svelte"), accountPage);
+    await ensureNew(join(cwd, "web/src/routes/account/+page.svelte"), accountPage);
     if (options.mfa.includes("totp")) {
       webManifest.dependencies.qrcode = "^1.5.4";
       webManifest.devDependencies["@types/qrcode"] = "^1.5.6";

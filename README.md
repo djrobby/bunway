@@ -23,7 +23,7 @@ container, proprietary frontend, or custom RPC protocol.
 - PostgreSQL by default; PostgreSQL, MySQL, and SQLite connections
 - model, validated API resource, full SvelteKit scaffold, Job, Realtime, Auth, Audit, Mailer, and SMS generators
 - relationships, polymorphic joins, local/S3-compatible attachments, soft deletion, and UUIDv7 IDs
-- PostgreSQL Jobs, typed SSE/WebSocket channels, generated Better Auth, durable Audit, and queued Mail/SMS
+- PostgreSQL Jobs (in-memory fallback without a database), typed SSE/WebSocket channels, generated Better Auth, durable Audit, and queued Mail/SMS
 - Bun tests and conventional Nginx/systemd deployment without requiring Redis or containers
 
 The [documentation](https://djrobby.github.io/bunway/) is organized for learning, building, and exact reference. Start
